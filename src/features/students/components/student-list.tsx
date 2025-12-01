@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence } from "motion/react";
 import { StudentCard } from "./student-card";
 import { StudentDraftCard } from "./student-draft-card";
 import { UserPlus } from "lucide-react";
@@ -54,47 +55,49 @@ export function StudentList({
 
     return (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Show draft card ONLY for new students (not editing) */}
-            {showDraft && draftMode === "new" && (
-                <StudentDraftCard
-                    draft={draft}
-                    loading={draftLoading}
-                    error={draftError}
-                    mode="new"
-                    onChange={onDraftChange}
-                    onValidate={onDraftValidate}
-                    onCancel={onDraftCancel}
-                />
-            )}
+            <AnimatePresence mode="popLayout">
+                {/* Show draft card ONLY for new students (not editing) */}
+                {showDraft && draftMode === "new" && (
+                    <StudentDraftCard
+                        draft={draft}
+                        loading={draftLoading}
+                        error={draftError}
+                        mode="new"
+                        onChange={onDraftChange}
+                        onValidate={onDraftValidate}
+                        onCancel={onDraftCancel}
+                    />
+                )}
 
-            {/* For each student, show either the draft card (if editing) or the regular card */}
-            {students.map((student) => {
-                const isBeingEdited = studentIdBeingEdited === student.id;
+                {/* For each student, show either the draft card (if editing) or the regular card */}
+                {students.map((student) => {
+                    const isBeingEdited = studentIdBeingEdited === student.id;
 
-                if (isBeingEdited) {
+                    if (isBeingEdited) {
+                        return (
+                            <StudentDraftCard
+                                key={student.id}
+                                draft={draft}
+                                loading={draftLoading}
+                                error={draftError}
+                                mode="edit"
+                                onChange={onDraftChange}
+                                onValidate={onDraftValidate}
+                                onCancel={onDraftCancel}
+                            />
+                        );
+                    }
+
                     return (
-                        <StudentDraftCard
+                        <StudentCard
                             key={student.id}
-                            draft={draft}
-                            loading={draftLoading}
-                            error={draftError}
-                            mode="edit"
-                            onChange={onDraftChange}
-                            onValidate={onDraftValidate}
-                            onCancel={onDraftCancel}
+                            student={student}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
                         />
                     );
-                }
-
-                return (
-                    <StudentCard
-                        key={student.id}
-                        student={student}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                    />
-                );
-            })}
+                })}
+            </AnimatePresence>
         </div>
     );
 }
