@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SimpleInput } from "./simple-input";
 import { SimpleTextarea } from "./simple-textarea";
-import { Check, X, UserPlus } from "lucide-react";
+import { Check, X, UserPlus, Edit } from "lucide-react";
 import type { StudentDraft } from "../types";
 
 type StudentDraftCardProps = {
     draft: StudentDraft;
     loading: boolean;
     error: string | null;
+    mode: "new" | "edit";
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     onValidate: () => void;
     onCancel: () => void;
@@ -21,11 +22,13 @@ export function StudentDraftCard({
     draft,
     loading,
     error,
+    mode,
     onChange,
     onValidate,
     onCancel,
 }: StudentDraftCardProps) {
     const isValid = draft.firstName.trim() && draft.lastName.trim();
+    const isEditMode = mode === "edit";
 
     return (
         <Card className="border-2 border-primary/40 shadow-lg bg-primary/5">
@@ -33,15 +36,23 @@ export function StudentDraftCard({
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-primary">
-                            <UserPlus className="h-6 w-6" />
+                            {isEditMode ? (
+                                <Edit className="h-6 w-6" />
+                            ) : (
+                                <UserPlus className="h-6 w-6" />
+                            )}
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h3 className="font-semibold text-lg text-foreground">New Student</h3>
+                                <h3 className="font-semibold text-lg text-foreground">
+                                    {isEditMode ? "Edit Student" : "New Student"}
+                                </h3>
                                 <Badge variant="default" className="text-xs">Draft</Badge>
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Fill in the details and validate to add
+                                {isEditMode
+                                    ? "Update the details and validate to save changes"
+                                    : "Fill in the details and validate to add"}
                             </p>
                         </div>
                     </div>
@@ -130,7 +141,11 @@ export function StudentDraftCard({
                         className="gap-2"
                     >
                         <Check className="h-4 w-4" />
-                        {loading ? "Validating..." : "Validate & Add"}
+                        {loading
+                            ? "Saving..."
+                            : isEditMode
+                                ? "Save Changes"
+                                : "Validate & Add"}
                     </Button>
                 </div>
             </CardContent>

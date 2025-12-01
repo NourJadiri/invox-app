@@ -8,6 +8,7 @@ import type { Student, StudentDraft } from "../types";
 type StudentListProps = {
     students: Student[];
     showDraft: boolean;
+    draftMode: "new" | "edit";
     draft: StudentDraft;
     draftLoading: boolean;
     draftError: string | null;
@@ -21,6 +22,7 @@ type StudentListProps = {
 export function StudentList({
     students,
     showDraft,
+    draftMode,
     draft,
     draftLoading,
     draftError,
@@ -55,6 +57,7 @@ export function StudentList({
                     draft={draft}
                     loading={draftLoading}
                     error={draftError}
+                    mode={draftMode}
                     onChange={onDraftChange}
                     onValidate={onDraftValidate}
                     onCancel={onDraftCancel}

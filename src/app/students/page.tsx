@@ -24,9 +24,11 @@ export default function StudentsPage() {
 
     // Draft state
     const [showDraft, setShowDraft] = useState(false);
+    const [draftMode, setDraftMode] = useState<"new" | "edit">("new");
     const [draft, setDraft] = useState<StudentDraft>({ ...emptyStudentDraft });
     const [draftLoading, setDraftLoading] = useState(false);
     const [draftError, setDraftError] = useState<string | null>(null);
+    const [studentBeingEdited, setStudentBeingEdited] = useState<Student | null>(null);
 
     // Delete confirmation dialog state
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -54,9 +56,11 @@ export default function StudentsPage() {
     }, []);
 
     function handleNewStudent() {
+        setDraftMode("new");
         setShowDraft(true);
         setDraft({ ...emptyStudentDraft });
         setDraftError(null);
+        setStudentBeingEdited(null);
     }
 
     function handleDraftChange(
@@ -79,8 +83,12 @@ export default function StudentsPage() {
         };
 
         try {
-            const res = await fetch("/api/students", {
-                method: "POST",
+            const isEditMode = draftMode === "edit" && studentBeingEdited;
+            const url = isEditMode ? `/api/students/${studentBeingEdited.id}` : "/api/students";
+            const method = isEditMode ? "PUT" : "POST";
+
+            const res = await fetch(url, {
+                method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
@@ -89,15 +97,18 @@ export default function StudentsPage() {
                 const data = (await res.json().catch(() => null)) as
                     | { error?: string }
                     | null;
-                throw new Error(data?.error ?? "Failed to add student");
+                const action = isEditMode ? "update" : "add";
+                throw new Error(data?.error ?? `Failed to ${action} student`);
             }
 
             // Success! Reset draft and reload
             setShowDraft(false);
             setDraft({ ...emptyStudentDraft });
+            setStudentBeingEdited(null);
             await loadStudents();
         } catch (err) {
-            setDraftError(err instanceof Error ? err.message : "Failed to add student");
+            const action = draftMode === "edit" ? "update" : "add";
+            setDraftError(err instanceof Error ? err.message : `Failed to ${action} student`);
         } finally {
             setDraftLoading(false);
         }
@@ -107,6 +118,7 @@ export default function StudentsPage() {
         setShowDraft(false);
         setDraft({ ...emptyStudentDraft });
         setDraftError(null);
+        setStudentBeingEdited(null);
     }
 
     function handleDelete(id: string) {
@@ -141,9 +153,17 @@ export default function StudentsPage() {
     }
 
     function handleEdit(student: Student) {
-        // TODO: Implement edit functionality
-        console.log("Edit student:", student);
-        alert("Edit functionality coming soon!");
+        setDraftMode("edit");
+        setStudentBeingEdited(student);
+        setDraft({
+            firstName: student.firstName,
+            lastName: student.lastName,
+            email: student.email || "",
+            phone: student.phone || "",
+            notes: student.notes || "",
+        });
+        setDraftError(null);
+        setShowDraft(true);
     }
 
     return (
@@ -217,6 +237,7 @@ export default function StudentsPage() {
                 <StudentList
                     students={students}
                     showDraft={showDraft}
+                    draftMode={draftMode}
                     draft={draft}
                     draftLoading={draftLoading}
                     draftError={draftError}
