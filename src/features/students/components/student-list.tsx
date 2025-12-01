@@ -55,7 +55,7 @@ export function StudentList({
 
     return (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence mode="sync">
                 {/* Show draft card ONLY for new students (not editing) */}
                 {showDraft && draftMode === "new" && (
                     <StudentDraftCard
