@@ -19,4 +19,19 @@ model Student {
   notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  lessons   Lesson[]
+}
+
+model Lesson {
+  id        String   @id @default(cuid())
+  title     String?
+  start     DateTime
+  end       DateTime
+  notes     String?
+  
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
