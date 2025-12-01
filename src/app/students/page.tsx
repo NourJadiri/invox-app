@@ -238,6 +238,7 @@ export default function StudentsPage() {
                     students={students}
                     showDraft={showDraft}
                     draftMode={draftMode}
+                    studentIdBeingEdited={studentBeingEdited?.id ?? null}
                     draft={draft}
                     draftLoading={draftLoading}
                     draftError={draftError}

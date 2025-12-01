@@ -9,6 +9,7 @@ type StudentListProps = {
     students: Student[];
     showDraft: boolean;
     draftMode: "new" | "edit";
+    studentIdBeingEdited: string | null;
     draft: StudentDraft;
     draftLoading: boolean;
     draftError: string | null;
@@ -23,6 +24,7 @@ export function StudentList({
     students,
     showDraft,
     draftMode,
+    studentIdBeingEdited,
     draft,
     draftLoading,
     draftError,
@@ -52,25 +54,47 @@ export function StudentList({
 
     return (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {showDraft && (
+            {/* Show draft card ONLY for new students (not editing) */}
+            {showDraft && draftMode === "new" && (
                 <StudentDraftCard
                     draft={draft}
                     loading={draftLoading}
                     error={draftError}
-                    mode={draftMode}
+                    mode="new"
                     onChange={onDraftChange}
                     onValidate={onDraftValidate}
                     onCancel={onDraftCancel}
                 />
             )}
-            {students.map((student) => (
-                <StudentCard
-                    key={student.id}
-                    student={student}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                />
-            ))}
+
+            {/* For each student, show either the draft card (if editing) or the regular card */}
+            {students.map((student) => {
+                const isBeingEdited = studentIdBeingEdited === student.id;
+
+                if (isBeingEdited) {
+                    return (
+                        <StudentDraftCard
+                            key={student.id}
+                            draft={draft}
+                            loading={draftLoading}
+                            error={draftError}
+                            mode="edit"
+                            onChange={onDraftChange}
+                            onValidate={onDraftValidate}
+                            onCancel={onDraftCancel}
+                        />
+                    );
+                }
+
+                return (
+                    <StudentCard
+                        key={student.id}
+                        student={student}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                    />
+                );
+            })}
         </div>
     );
 }
