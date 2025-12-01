@@ -81,37 +81,42 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
                 </CardHeader>
 
                 <CardContent className="space-y-2 text-sm">
-                    {student.email && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                            <Mail className="h-4 w-4" />
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <Mail className="h-4 w-4" />
+                        {student.email ? (
                             <a
                                 href={`mailto:${student.email}`}
                                 className="hover:text-primary transition-colors"
                             >
                                 {student.email}
                             </a>
-                        </div>
-                    )}
-                    {student.phone && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                            <Phone className="h-4 w-4" />
+                        ) : (
+                            <span className="text-muted-foreground/50 italic text-xs">No email</span>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        {student.phone ? (
                             <a
                                 href={`tel:${student.phone}`}
                                 className="hover:text-primary transition-colors"
                             >
                                 {student.phone}
                             </a>
-                        </div>
-                    )}
-                    {student.notes && (
-                        <div className="flex items-start gap-2 text-muted-foreground">
-                            <FileText className="h-4 w-4 mt-0.5" />
+                        ) : (
+                            <span className="text-muted-foreground/50 italic text-xs">No phone</span>
+                        )}
+                    </div>
+
+                    <div className="flex items-start gap-2 text-muted-foreground">
+                        <FileText className="h-4 w-4 mt-0.5" />
+                        {student.notes ? (
                             <p className="line-clamp-2 text-xs">{student.notes}</p>
-                        </div>
-                    )}
-                    {!student.email && !student.phone && !student.notes && (
-                        <p className="text-xs text-muted-foreground italic">No additional information</p>
-                    )}
+                        ) : (
+                            <span className="text-muted-foreground/50 italic text-xs">No notes</span>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
         </motion.div>
