@@ -7,9 +7,10 @@ import { startOfWeek } from "date-fns/startOfWeek";
 import { getDay } from "date-fns/getDay";
 import { enUS } from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import "./calendar-custom.css";
+import "../../styles/calendar-custom.css";
 import type { Lesson } from "@/features/schedule/types";
 import { useState } from "react";
+import EventComponent from "./EventComponent";
 
 const locales = {
     "en-US": enUS,
@@ -30,24 +31,6 @@ type CalendarViewProps = {
     onEditLesson: (lesson: Lesson) => void;
 };
 
-// Custom event component to display student information
-const EventComponent = ({ event }: { event: { resource: Lesson; title: string } }) => {
-    const lesson = event.resource;
-    const studentName = lesson.student
-        ? `${lesson.student.firstName} ${lesson.student.lastName}`
-        : "No student";
-
-    return (
-        <div className="flex flex-col gap-0.5 overflow-hidden">
-            {lesson.title && (
-                <div className="font-semibold text-xs truncate">{lesson.title}</div>
-            )}
-            <div className="text-xs opacity-90 truncate">
-                👤 {studentName}
-            </div>
-        </div>
-    );
-};
 
 export function CalendarView({
     lessons,
