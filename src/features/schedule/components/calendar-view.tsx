@@ -1,12 +1,13 @@
 "use client";
 
 import { Calendar, dateFnsLocalizer, View, Views } from "react-big-calendar";
-import format from "date-fns/format";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
-import getDay from "date-fns/getDay";
-import enUS from "date-fns/locale/en-US";
+import { format } from "date-fns/format";
+import { parse } from "date-fns/parse";
+import { startOfWeek } from "date-fns/startOfWeek";
+import { getDay } from "date-fns/getDay";
+import { enUS } from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import "./calendar-custom.css";
 import type { Lesson } from "@/features/schedule/types";
 import { useState } from "react";
 
@@ -29,6 +30,25 @@ type CalendarViewProps = {
     onEditLesson: (lesson: Lesson) => void;
 };
 
+// Custom event component to display student information
+const EventComponent = ({ event }: { event: { resource: Lesson; title: string } }) => {
+    const lesson = event.resource;
+    const studentName = lesson.student
+        ? `${lesson.student.firstName} ${lesson.student.lastName}`
+        : "No student";
+
+    return (
+        <div className="flex flex-col gap-0.5 overflow-hidden">
+            {lesson.title && (
+                <div className="font-semibold text-xs truncate">{lesson.title}</div>
+            )}
+            <div className="text-xs opacity-90 truncate">
+                👤 {studentName}
+            </div>
+        </div>
+    );
+};
+
 export function CalendarView({
     lessons,
     date,
@@ -46,7 +66,7 @@ export function CalendarView({
     }));
 
     return (
-        <div className="h-[600px] p-4">
+        <div className="h-[700px] p-6">
             <Calendar
                 localizer={localizer}
                 events={events}
@@ -59,6 +79,9 @@ export function CalendarView({
                 onView={setView}
                 onSelectEvent={(event) => onEditLesson(event.resource)}
                 views={[Views.MONTH, Views.WEEK, Views.DAY]}
+                components={{
+                    event: EventComponent,
+                }}
             />
         </div>
     );
