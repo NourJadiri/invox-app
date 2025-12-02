@@ -30,6 +30,7 @@ model Lesson {
   notes     String?
   price     Float?
   recurrent Boolean  @default(false)
+  color     String?  // Hex color code (e.g., #3b82f6)
   
   studentId String
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)

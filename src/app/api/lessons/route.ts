@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, start, end, notes, studentId, price, recurrent } = body;
+    const { title, start, end, notes, studentId, price, recurrent, color } = body;
 
     if (!start || !end || !studentId) {
       return NextResponse.json(
@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
           notes,
           price,
           recurrent: true,
+          color,
           studentId,
         },
         include: {
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
           notes,
           price,
           recurrent: false,
+          color,
           studentId,
           recurringLessonId: templateLesson.id,
         });
@@ -103,6 +105,7 @@ export async function POST(request: NextRequest) {
           notes,
           price,
           recurrent: false,
+          color,
           studentId,
         },
         include: {

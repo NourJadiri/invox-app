@@ -8,6 +8,7 @@ export type Lesson = {
   notes: string | null;
   price: number | null;
   recurrent: boolean;
+  color: string | null;
   recurringLessonId: string | null;
   studentId: string;
   student?: Student;

@@ -8,7 +8,7 @@ export async function PUT(
   const { id } = await params;
   try {
     const body = await request.json();
-    const { title, start, end, notes, studentId, price, recurrent } = body;
+    const { title, start, end, notes, studentId, price, recurrent, color } = body;
 
     const lesson = await prisma.lesson.update({
       where: { id },
@@ -20,6 +20,7 @@ export async function PUT(
         studentId,
         price,
         recurrent,
+        color,
       },
       include: {
         student: true,
