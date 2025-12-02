@@ -30,6 +30,8 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
     const [endTime, setEndTime] = useState("");
     const [title, setTitle] = useState("");
     const [notes, setNotes] = useState("");
+    const [price, setPrice] = useState<number | null>(null);
+    const [recurrent, setRecurrent] = useState(false);
 
     useEffect(() => {
         if (open) {
@@ -44,6 +46,8 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
                 setEndTime(format(end, "HH:mm"));
                 setTitle(lesson.title || "");
                 setNotes(lesson.notes || "");
+                setPrice(lesson.price);
+                setRecurrent(lesson.recurrent);
             } else {
                 // Create mode: reset form
                 setStudentId("");
@@ -54,6 +58,8 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
                 setEndTime(format(oneHourLater, "HH:mm"));
                 setTitle("");
                 setNotes("");
+                setPrice(null);
+                setRecurrent(false);
             }
             setError(null);
         }
@@ -86,6 +92,8 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
                 start: startDateTime.toISOString(),
                 end: endDateTime.toISOString(),
                 notes: notes || null,
+                price: price,
+                recurrent: recurrent,
             };
 
             const url = lesson ? `/api/lessons/${lesson.id}` : "/api/lessons";
@@ -102,7 +110,7 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
             }
 
             onSave();
-        } catch (err) {
+        } catch (_err) {
             setError("Failed to save lesson. Please try again.");
         } finally {
             setLoading(false);
@@ -117,7 +125,7 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
             const res = await fetch(`/api/lessons/${lesson.id}`, { method: "DELETE" });
             if (!res.ok) throw new Error("Failed to delete lesson");
             onSave();
-        } catch (err) {
+        } catch (_err) {
             setError("Failed to delete lesson");
             setLoading(false);
         }
@@ -197,6 +205,32 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
                                 required
                             />
                         </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="price">Price (€)</Label>
+                        <Input
+                            id="price"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={price ?? ""}
+                            onChange={(e) => setPrice(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="e.g. 50.00"
+                        />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                        <input
+                            id="recurrent"
+                            type="checkbox"
+                            checked={recurrent}
+                            onChange={(e) => setRecurrent(e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <Label htmlFor="recurrent" className="cursor-pointer">
+                            Recurring weekly lesson
+                        </Label>
                     </div>
 
                     <div className="space-y-2">

@@ -28,9 +28,16 @@ model Lesson {
   start     DateTime
   end       DateTime
   notes     String?
+  price     Float?
+  recurrent Boolean  @default(false)
   
   studentId String
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  // For recurring lessons: links instances to their template
+  recurringLessonId String?
+  recurringLesson   Lesson?  @relation("RecurringInstances", fields: [recurringLessonId], references: [id], onDelete: Cascade)
+  instances         Lesson[] @relation("RecurringInstances")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

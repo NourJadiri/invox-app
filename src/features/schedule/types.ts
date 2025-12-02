@@ -6,6 +6,9 @@ export type Lesson = {
   start: string; // ISO string from API
   end: string;   // ISO string from API
   notes: string | null;
+  price: number | null;
+  recurrent: boolean;
+  recurringLessonId: string | null;
   studentId: string;
   student?: Student;
   createdAt: string;
@@ -17,6 +20,8 @@ export type LessonDraft = {
   start: Date;
   end: Date;
   notes: string;
+  price: number | null;
+  recurrent: boolean;
   studentId: string;
 };
 
@@ -25,5 +30,7 @@ export const emptyLessonDraft: LessonDraft = {
   start: new Date(),
   end: new Date(new Date().setHours(new Date().getHours() + 1)),
   notes: "",
+  price: null,
+  recurrent: false,
   studentId: "",
 };

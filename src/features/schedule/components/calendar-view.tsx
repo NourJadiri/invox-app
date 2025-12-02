@@ -5,7 +5,7 @@ import { format } from "date-fns/format";
 import { parse } from "date-fns/parse";
 import { startOfWeek } from "date-fns/startOfWeek";
 import { getDay } from "date-fns/getDay";
-import { enUS } from "date-fns/locale/en-US";
+import { fr } from "date-fns/locale/fr";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../../../styles/calendar-custom.css";
 import type { Lesson } from "@/features/schedule/types";
@@ -13,7 +13,7 @@ import { useState } from "react";
 import EventComponent from "./EventComponent";
 
 const locales = {
-    "en-US": enUS,
+    "fr": fr,
 };
 
 const localizer = dateFnsLocalizer({
@@ -65,6 +65,7 @@ export function CalendarView({
                 components={{
                     event: EventComponent,
                 }}
+                culture="fr"
             />
         </div>
     );
