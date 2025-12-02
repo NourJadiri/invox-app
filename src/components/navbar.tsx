@@ -53,18 +53,19 @@ export function Navbar() {
 
                                     return (
                                         <NavigationMenuItem key={item.href}>
-                                            <Link href={item.href} legacyBehavior passHref>
-                                                <NavigationMenuLink
-                                                    className={cn(
-                                                        navigationMenuTriggerStyle(),
-                                                        "bg-transparent",
-                                                        isActive && "bg-accent text-accent-foreground"
-                                                    )}
-                                                >
+                                            <NavigationMenuLink
+                                                asChild
+                                                className={cn(
+                                                    navigationMenuTriggerStyle(),
+                                                    "bg-transparent",
+                                                    isActive && "bg-accent text-accent-foreground"
+                                                )}
+                                            >
+                                                <Link href={item.href}>
                                                     <Icon className="mr-2 h-4 w-4" />
                                                     {item.name}
-                                                </NavigationMenuLink>
-                                            </Link>
+                                                </Link>
+                                            </NavigationMenuLink>
                                         </NavigationMenuItem>
                                     );
                                 })}

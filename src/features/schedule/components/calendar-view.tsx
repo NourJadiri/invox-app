@@ -7,7 +7,7 @@ import { startOfWeek } from "date-fns/startOfWeek";
 import { getDay } from "date-fns/getDay";
 import { enUS } from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import "../../styles/calendar-custom.css";
+import "../../../styles/calendar-custom.css";
 import type { Lesson } from "@/features/schedule/types";
 import { useState } from "react";
 import EventComponent from "./EventComponent";
