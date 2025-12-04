@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, List, Plus } from "lucide-react";
+import { Calendar, List, Plus, Check } from "lucide-react";
 import { CalendarView } from "@/features/schedule/components/calendar-view";
 import { ListView } from "@/features/schedule/components/list-view";
 import { LessonFormDialog } from "@/features/schedule/components/lesson-form-dialog";
 import type { Lesson } from "@/features/schedule/types";
 import { startOfMonth, endOfMonth, subMonths, addMonths } from "date-fns";
+import { useSession, signIn } from "next-auth/react";
 
 export default function SchedulePage() {
+    const { data: session } = useSession();
     const [view, setView] = useState<"calendar" | "list">("calendar");
     const [lessons, setLessons] = useState<Lesson[]>([]);
     const [loading, setLoading] = useState(true);
@@ -63,6 +65,17 @@ export default function SchedulePage() {
                     <p className="text-muted-foreground">Manage your lessons and events</p>
                 </div>
                 <div className="flex items-center gap-2">
+                    {session ? (
+                        <Button variant="outline" className="gap-2" disabled>
+                            <Check className="h-4 w-4" />
+                            Calendar Connected
+                        </Button>
+                    ) : (
+                        <Button variant="outline" onClick={() => signIn("google")} className="gap-2">
+                            <Calendar className="h-4 w-4" />
+                            Connect Google Calendar
+                        </Button>
+                    )}
                     <div className="flex items-center rounded-md border bg-muted/50 p-1">
                         <Button
                             variant={view === "calendar" ? "secondary" : "ghost"}
