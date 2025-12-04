@@ -132,6 +132,7 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
             onSave();
         } catch (_err) {
             setError("Failed to delete lesson");
+        } finally {
             setLoading(false);
         }
     }
