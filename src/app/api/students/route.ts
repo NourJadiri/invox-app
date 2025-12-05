@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getStudents, createStudent } from "@/services/students";
 
 export async function GET() {
-  const students = await prisma.student.findMany({
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json(students);
+  try {
+    const students = await getStudents();
+    return NextResponse.json(students);
+  } catch (error) {
+    console.error("Failed to fetch students:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch students" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -22,25 +28,24 @@ export async function POST(request: NextRequest) {
   if (!body?.firstName || !body?.lastName) {
     return NextResponse.json(
       { error: "firstName and lastName are required" },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
   try {
-    const student = await prisma.student.create({
-      data: {
-        firstName: body.firstName.trim(),
-        lastName: body.lastName.trim(),
-        email: body.email?.trim() || null,
-        phone: body.phone?.trim() || null,
-        notes: body.notes?.trim() || null,
-      },
+    const student = await createStudent({
+      firstName: body.firstName,
+      lastName: body.lastName,
+      email: body.email,
+      phone: body.phone,
+      notes: body.notes,
     });
     return NextResponse.json(student, { status: 201 });
-  } catch (err) {
+  } catch (error) {
+    console.error("Failed to create student:", error);
     return NextResponse.json(
       { error: "Failed to create student" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

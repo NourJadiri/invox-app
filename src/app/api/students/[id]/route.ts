@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { updateStudent, deleteStudent } from "@/services/students";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   const body = (await request.json().catch(() => null)) as
@@ -19,42 +19,41 @@ export async function PUT(
   if (!body?.firstName || !body?.lastName) {
     return NextResponse.json(
       { error: "firstName and lastName are required" },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
   try {
-    const student = await prisma.student.update({
-      where: { id },
-      data: {
-        firstName: body.firstName.trim(),
-        lastName: body.lastName.trim(),
-        email: body.email?.trim() || null,
-        phone: body.phone?.trim() || null,
-        notes: body.notes?.trim() || null,
-      },
+    const student = await updateStudent(id, {
+      firstName: body.firstName,
+      lastName: body.lastName,
+      email: body.email,
+      phone: body.phone,
+      notes: body.notes,
     });
     return NextResponse.json(student);
-  } catch (err) {
+  } catch (error) {
+    console.error("Failed to update student:", error);
     return NextResponse.json(
       { error: "Failed to update student" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   try {
-    await prisma.student.delete({ where: { id } });
+    await deleteStudent(id);
     return NextResponse.json({ success: true });
-  } catch (err) {
+  } catch (error) {
+    console.error("Failed to delete student:", error);
     return NextResponse.json(
       { error: "Failed to delete student" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, List, Plus, Check } from "lucide-react";
 import { CalendarView } from "@/features/schedule/components/calendar-view";
@@ -19,7 +19,7 @@ export default function SchedulePage() {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
-    async function loadLessons() {
+    const loadLessons = useCallback(async () => {
         setLoading(true);
         try {
             // Fetch lessons for a wide range around current date to be safe
@@ -36,11 +36,11 @@ export default function SchedulePage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [currentDate]);
 
     useEffect(() => {
         void loadLessons();
-    }, [currentDate]);
+    }, [loadLessons]);
 
     function handleCreateLesson() {
         setSelectedLesson(null);
