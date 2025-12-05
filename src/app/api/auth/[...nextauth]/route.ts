@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
+// comment to check if the lint-staged is working
 export const authOptions: NextAuthOptions = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- PrismaAdapter type incompatible with better-sqlite3 adapter
   adapter: PrismaAdapter(prisma as any),
