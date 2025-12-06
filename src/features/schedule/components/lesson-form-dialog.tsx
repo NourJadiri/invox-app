@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createLessonAction, updateLessonAction, deleteLessonAction } from "@/features/schedule/actions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -92,31 +93,30 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
 
             const payload = {
                 studentId,
-                title: title || null,
+                title: title || undefined,
                 start: startDateTime.toISOString(),
                 end: endDateTime.toISOString(),
-                notes: notes || null,
-                price: price,
+                notes: notes || undefined,
+                price: price ?? undefined,
                 recurrent: recurrent,
-                color: color,
+                color: color || undefined,
             };
 
-            const url = lesson ? `/api/lessons/${lesson.id}` : "/api/lessons";
-            const method = lesson ? "PUT" : "POST";
+            // Use server actions instead of fetch!
+            const result = lesson
+                ? await updateLessonAction(lesson.id, payload)
+                : await createLessonAction(payload);
 
-            const res = await fetch(url, {
-                method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) {
-                throw new Error("Failed to save lesson");
+            if (!result.success) {
+                setError(result.error || "Failed to save lesson");
+                return;
             }
 
+            // Success! Close the dialog
             onSave();
-        } catch (_err) {
-            setError("Failed to save lesson. Please try again.");
+        } catch (err) {
+            console.error("Unexpected error:", err);
+            setError("An unexpected error occurred. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -126,12 +126,20 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
         if (!lesson || !confirm("Are you sure you want to delete this lesson?")) return;
 
         setLoading(true);
+        setError(null);
+
         try {
-            const res = await fetch(`/api/lessons/${lesson.id}`, { method: "DELETE" });
-            if (!res.ok) throw new Error("Failed to delete lesson");
+            const result = await deleteLessonAction(lesson.id);
+
+            if (!result.success) {
+                setError(result.error || "Failed to delete lesson");
+                return;
+            }
+
             onSave();
-        } catch (_err) {
-            setError("Failed to delete lesson");
+        } catch (err) {
+            console.error("Unexpected error:", err);
+            setError("Failed to delete lesson. Please try again.");
         } finally {
             setLoading(false);
         }

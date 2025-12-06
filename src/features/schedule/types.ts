@@ -1,20 +1,7 @@
-import type { Student } from "@/features/students/types";
+import type { LessonWithStudent } from "@/services/types/lessons";
 
-export type Lesson = {
-  id: string;
-  title: string | null;
-  start: string; // ISO string from API
-  end: string;   // ISO string from API
-  notes: string | null;
-  price: number | null;
-  recurrent: boolean;
-  color: string | null;
-  recurringLessonId: string | null;
-  studentId: string;
-  student?: Student;
-  createdAt: string;
-  updatedAt: string;
-};
+// Use the Prisma type for lessons throughout the app
+export type Lesson = LessonWithStudent;
 
 export type LessonDraft = {
   title: string;
