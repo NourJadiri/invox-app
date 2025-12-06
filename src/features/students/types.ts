@@ -1,13 +1,6 @@
-export type Student = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  phone: string | null;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+// Re-export Student type from service layer to ensure consistency
+export type { Student } from "@/services/types/students";
+
 
 export type StudentDraft = {
   firstName: string;
