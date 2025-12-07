@@ -13,16 +13,22 @@ interface InvoicePreviewProps {
   config: InvoiceConfig;
 }
 
-function calculateHourlyPrice(lesson: InvoiceConfig["lessons"][0]): number {
-  const price = lesson.price ?? 0;
-  if (price === 0) return 0;
-
+function getLessonDurationHours(lesson: InvoiceConfig["lessons"][0]): number {
   const startTime = new Date(lesson.start).getTime();
   const endTime = new Date(lesson.end).getTime();
   const durationMs = endTime - startTime;
   const durationHours = durationMs / (1000 * 60 * 60);
+  return durationHours > 0 ? durationHours : 0;
+}
 
-  return durationHours > 0 ? price / durationHours : 0;
+function getLessonHourlyRate(lesson: InvoiceConfig["lessons"][0]): number {
+  return lesson.price ?? 0;
+}
+
+function getLessonTotal(lesson: InvoiceConfig["lessons"][0]): number {
+  const hours = getLessonDurationHours(lesson);
+  const rate = getLessonHourlyRate(lesson);
+  return hours * rate;
 }
 
 export function InvoicePreview({ config }: InvoicePreviewProps) {
@@ -41,10 +47,7 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
 
   const studentTotals = selectedStudents.map((student) => {
     const studentLessons = lessonsByStudent.get(student.id) ?? [];
-    const total = studentLessons.reduce((sum, lesson) => {
-      const hourlyPrice = calculateHourlyPrice(lesson);
-      return sum + hourlyPrice;
-    }, 0);
+    const total = studentLessons.reduce((sum, lesson) => sum + getLessonTotal(lesson), 0);
     return { student, total };
   });
 
@@ -142,7 +145,9 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
               <TableHead className="w-40">Date</TableHead>
               <TableHead>Student</TableHead>
               <TableHead>Title</TableHead>
-              <TableHead className="text-right">Price</TableHead>
+              <TableHead className="text-right w-20">Hours</TableHead>
+              <TableHead className="text-right w-28">Hourly rate</TableHead>
+              <TableHead className="text-right w-28">Total</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -151,7 +156,15 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
               .map((lesson) => {
                 const student = students.find((s) => s.id === lesson.studentId);
                 const dateLabel = format(new Date(lesson.start), "dd/MM/yyyy HH:mm", { locale: fr });
-                const hourlyPrice = calculateHourlyPrice(lesson);
+                const hours = getLessonDurationHours(lesson);
+                const hourlyRate = getLessonHourlyRate(lesson);
+                const total = getLessonTotal(lesson);
+
+                const hoursLabel = hours.toLocaleString("fr-FR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                });
+
                 return (
                   <TableRow key={lesson.id}>
                     <TableCell>{dateLabel}</TableCell>
@@ -161,8 +174,16 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
                     <TableCell className="max-w-[260px] truncate">
                       {lesson.title || "Lesson"}
                     </TableCell>
+                    <TableCell className="text-right">{hoursLabel}</TableCell>
                     <TableCell className="text-right">
-                      {hourlyPrice ? hourlyPrice.toLocaleString("fr-FR", { style: "currency", currency: "EUR" }) : "-"}
+                      {hourlyRate
+                        ? hourlyRate.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {total
+                        ? total.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
+                        : "-"}
                     </TableCell>
                   </TableRow>
                 );
@@ -170,7 +191,7 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
           </TableBody>
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={3} className="text-right font-semibold">
+              <TableCell colSpan={5} className="text-right font-semibold">
                 Total due
               </TableCell>
               <TableCell className="text-right font-bold">

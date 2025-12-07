@@ -3,16 +3,22 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { INVOICE_CSS } from "@/features/invoice/server/invoice-styles";
 
-function calculateHourlyPrice(lesson: InvoiceConfig["lessons"][0]): number {
-  const price = lesson.price ?? 0;
-  if (price === 0) return 0;
-
+function getLessonDurationHours(lesson: InvoiceConfig["lessons"][0]): number {
   const startTime = new Date(lesson.start).getTime();
   const endTime = new Date(lesson.end).getTime();
   const durationMs = endTime - startTime;
   const durationHours = durationMs / (1000 * 60 * 60);
+  return durationHours > 0 ? durationHours : 0;
+}
 
-  return durationHours > 0 ? price / durationHours : 0;
+function getLessonHourlyRate(lesson: InvoiceConfig["lessons"][0]): number {
+  return lesson.price ?? 0;
+}
+
+function getLessonTotal(lesson: InvoiceConfig["lessons"][0]): number {
+  const hours = getLessonDurationHours(lesson);
+  const rate = getLessonHourlyRate(lesson);
+  return hours * rate;
 }
 
 export function buildInvoiceHtml(config: InvoiceConfig) {
@@ -28,10 +34,7 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
 
   const studentTotals = selectedStudents.map((student) => {
     const studentLessons = lessonsByStudent.get(student.id) ?? [];
-    const total = studentLessons.reduce((sum, lesson) => {
-      const hourlyPrice = calculateHourlyPrice(lesson);
-      return sum + hourlyPrice;
-    }, 0);
+    const total = studentLessons.reduce((sum, lesson) => sum + getLessonTotal(lesson), 0);
     return { student, total };
   });
 
@@ -45,9 +48,21 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
     .map((lesson) => {
       const student = students.find((s) => s.id === lesson.studentId);
       const dateLabel = format(new Date(lesson.start), "dd/MM/yyyy HH:mm", { locale: fr });
-      const hourlyPrice = calculateHourlyPrice(lesson);
-      const priceLabel = hourlyPrice
-        ? hourlyPrice.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
+      const hours = getLessonDurationHours(lesson);
+      const hourlyRate = getLessonHourlyRate(lesson);
+      const total = getLessonTotal(lesson);
+
+      const hoursLabel = hours.toLocaleString("fr-FR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      const hourlyRateLabel = hourlyRate
+        ? hourlyRate.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
+        : "-";
+
+      const totalLabel = total
+        ? total.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })
         : "-";
 
       return `
@@ -55,7 +70,9 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
           <td class="cell date">${dateLabel}</td>
           <td class="cell">${student ? `${student.firstName} ${student.lastName}` : "-"}</td>
           <td class="cell title">${lesson.title || "Lesson"}</td>
-          <td class="cell amount">${priceLabel}</td>
+          <td class="cell amount" style="text-align: right;">${hoursLabel}</td>
+          <td class="cell amount" style="text-align: right;">${hourlyRateLabel}</td>
+          <td class="cell amount" style="text-align: right;">${totalLabel}</td>
         </tr>
       `;
     })
@@ -150,7 +167,9 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
               <th style="width: 120px;">Date</th>
               <th style="width: 160px;">Élève</th>
               <th>Intitulé</th>
-              <th style="width: 100px; text-align: right;">Prix</th>
+              <th style="width: 80px; text-align: right;">Heures</th>
+              <th style="width: 120px; text-align: right;">Taux horaire</th>
+              <th style="width: 120px; text-align: right;">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -158,7 +177,7 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="3" class="label">Total dû</td>
+              <td colspan="5" class="label">Total dû</td>
               <td class="value">${grandTotalLabel}</td>
             </tr>
           </tfoot>
