@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Users, Calendar, Home } from "lucide-react";
+import { Users, Calendar, Home, FileText } from "lucide-react";
 import {
     NavigationMenu,
     NavigationMenuItem,
@@ -27,6 +27,11 @@ const navItems = [
         name: "Schedule",
         href: "/schedule",
         icon: Calendar,
+    },
+    {
+        name: "Invoice",
+        href: "/invoice",
+        icon: FileText,
     },
 ];
 
