@@ -266,7 +266,6 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
                                 placeholder="50.00"
                                 className="h-10 pl-7"
                             />
-                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€/h</span>
                         </div>
                     </div>
 
