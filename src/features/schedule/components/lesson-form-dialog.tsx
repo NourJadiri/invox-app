@@ -253,7 +253,7 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
                     <div className="space-y-2">
                         <Label htmlFor="price" className="text-sm font-medium flex items-center gap-2">
                             <DollarSign className="h-4 w-4" />
-                            Price
+                            Hourly Rate <span className="text-muted-foreground text-xs font-normal">(optional)</span>
                         </Label>
                         <div className="relative">
                             <Input
@@ -266,7 +266,7 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
                                 placeholder="50.00"
                                 className="h-10 pl-7"
                             />
-                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€</span>
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€/h</span>
                         </div>
                     </div>
 
