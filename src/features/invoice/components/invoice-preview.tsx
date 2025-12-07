@@ -13,6 +13,18 @@ interface InvoicePreviewProps {
   config: InvoiceConfig;
 }
 
+function calculateHourlyPrice(lesson: InvoiceConfig["lessons"][0]): number {
+  const price = lesson.price ?? 0;
+  if (price === 0) return 0;
+
+  const startTime = new Date(lesson.start).getTime();
+  const endTime = new Date(lesson.end).getTime();
+  const durationMs = endTime - startTime;
+  const durationHours = durationMs / (1000 * 60 * 60);
+
+  return durationHours > 0 ? price / durationHours : 0;
+}
+
 export function InvoicePreview({ config }: InvoicePreviewProps) {
   const { startDate, endDate, lessons, students, selectedStudentIds } = config;
 
@@ -29,7 +41,10 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
 
   const studentTotals = selectedStudents.map((student) => {
     const studentLessons = lessonsByStudent.get(student.id) ?? [];
-    const total = studentLessons.reduce((sum, lesson) => sum + (lesson.price ?? 0), 0);
+    const total = studentLessons.reduce((sum, lesson) => {
+      const hourlyPrice = calculateHourlyPrice(lesson);
+      return sum + hourlyPrice;
+    }, 0);
     return { student, total };
   });
 
@@ -136,7 +151,7 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
               .map((lesson) => {
                 const student = students.find((s) => s.id === lesson.studentId);
                 const dateLabel = format(new Date(lesson.start), "dd/MM/yyyy HH:mm", { locale: fr });
-                const price = lesson.price ?? 0;
+                const hourlyPrice = calculateHourlyPrice(lesson);
                 return (
                   <TableRow key={lesson.id}>
                     <TableCell>{dateLabel}</TableCell>
@@ -147,7 +162,7 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
                       {lesson.title || "Lesson"}
                     </TableCell>
                     <TableCell className="text-right">
-                      {price ? price.toLocaleString("fr-FR", { style: "currency", currency: "EUR" }) : "-"}
+                      {hourlyPrice ? hourlyPrice.toLocaleString("fr-FR", { style: "currency", currency: "EUR" }) : "-"}
                     </TableCell>
                   </TableRow>
                 );
