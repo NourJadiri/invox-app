@@ -141,7 +141,7 @@ export default function StudentsManager({ initialStudents }: { initialStudents: 
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-            <main className="mx-auto max-w-7xl px-4 py-10 md:py-16">
+            <main className="container mx-auto py-8 px-4">
                 <StudentsHeader
                     studentCount={students.length}
                     showDraft={showDraft}
