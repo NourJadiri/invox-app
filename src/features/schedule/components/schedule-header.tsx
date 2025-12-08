@@ -20,19 +20,31 @@ export function ScheduleHeader({
     return (
         <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">Schedule</h1>
-                <p className="text-muted-foreground">Manage your lessons and events</p>
+                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-sm mb-4">
+                    <span className="relative flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                    </span>
+                    <span>Invox</span>
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl flex items-center gap-2">
+                    <Calendar className="h-7 w-7" />
+                    Schedule
+                </h1>
+                <p className="mt-3 text-base text-muted-foreground md:text-lg max-w-2xl">
+                    Manage your lessons and events. View in calendar or list format.
+                </p>
             </div>
             <div className="flex items-center gap-2">
                 {session ? (
-                    <Button variant="outline" className="gap-2" disabled>
+                    <Button variant="outline" size="lg" className="gap-2" disabled>
                         <Check className="h-4 w-4" />
-                        Calendar Connected
+                        <span className="hidden sm:inline">Calendar Connected</span>
                     </Button>
                 ) : (
-                    <Button variant="outline" onClick={() => signIn("google")} className="gap-2">
+                    <Button variant="outline" size="lg" onClick={() => signIn("google")} className="gap-2">
                         <Calendar className="h-4 w-4" />
-                        Connect Google Calendar
+                        <span className="hidden sm:inline">Connect Google</span>
                     </Button>
                 )}
                 <div className="flex items-center rounded-md border bg-muted/50 p-1">
@@ -43,7 +55,7 @@ export function ScheduleHeader({
                         className="gap-2"
                     >
                         <Calendar className="h-4 w-4" />
-                        Calendar
+                        <span className="hidden sm:inline">Calendar</span>
                     </Button>
                     <Button
                         variant={view === "list" ? "secondary" : "ghost"}
@@ -52,10 +64,10 @@ export function ScheduleHeader({
                         className="gap-2"
                     >
                         <List className="h-4 w-4" />
-                        List
+                        <span className="hidden sm:inline">List</span>
                     </Button>
                 </div>
-                <Button onClick={onNewLesson} className="gap-2">
+                <Button size="lg" onClick={onNewLesson} className="gap-2">
                     <Plus className="h-4 w-4" />
                     New Lesson
                 </Button>
@@ -63,3 +75,4 @@ export function ScheduleHeader({
         </header>
     );
 }
+
