@@ -48,3 +48,9 @@ export async function getInvoiceById(id: string): Promise<InvoiceWithStudents | 
 
   return invoice;
 }
+
+export async function deleteInvoice(id: string): Promise<void> {
+  await prisma.invoice.delete({
+    where: { id },
+  });
+}
