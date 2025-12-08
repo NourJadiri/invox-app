@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { InvoiceConfig, InvoiceLesson, InvoiceStudent } from "@/features/invoice/types";
 import { Calendar, AlertCircle, Users } from "lucide-react";
+import { createInvoiceAction } from "@/features/invoice/actions";
+import { computeInvoiceTotal } from "@/features/invoice/utils";
 
 interface InvoiceFormDialogProps {
   open: boolean;
@@ -118,20 +120,43 @@ export function InvoiceFormDialog({ open, onOpenChange, onInvoiceGenerated }: In
     }
   }
 
-  function handleGenerateInvoice() {
+  async function handleGenerateInvoice() {
     if (!startDate || !endDate) return;
     if (selectedStudentIds.length === 0) {
       setError("Please select at least one student.");
       return;
     }
 
-    onInvoiceGenerated({
-      startDate,
-      endDate,
-      lessons,
-      students,
-      selectedStudentIds,
-    });
+    try {
+      setLoading(true);
+      setError(null);
+
+      const invoiceConfig: InvoiceConfig = {
+        startDate,
+        endDate,
+        lessons,
+        students,
+        selectedStudentIds,
+      };
+
+      const total = computeInvoiceTotal(invoiceConfig);
+
+      const result = await createInvoiceAction({
+        startDate,
+        endDate,
+        studentIds: selectedStudentIds,
+        total,
+      });
+
+      if (!result.success) {
+        setError(result.error ?? "Failed to save invoice record.");
+        return;
+      }
+
+      onInvoiceGenerated(invoiceConfig);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const allSelected = students.length > 0 && selectedStudentIds.length === students.length;
