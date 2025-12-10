@@ -5,6 +5,7 @@ import { CalendarView } from "@/features/schedule/components/calendar-view";
 import { ListView } from "@/features/schedule/components/list-view";
 import { LessonFormDialog } from "@/features/schedule/components/lesson-form-dialog";
 import { ScheduleHeader } from "@/features/schedule/components/schedule-header";
+import { syncToGoogleCalendarAction } from "@/features/schedule/actions";
 import type { Lesson } from "@/features/schedule/types";
 import { useRouter } from "next/navigation";
 
@@ -39,6 +40,7 @@ export default function ScheduleManager({ initialLessons }: { initialLessons: Le
                 view={view}
                 onViewChange={setView}
                 onNewLesson={handleCreateLesson}
+                onSync={syncToGoogleCalendarAction}
             />
 
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm">

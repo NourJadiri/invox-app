@@ -3,7 +3,7 @@ import puppeteer from "puppeteer";
 import { buildInvoiceHtml } from "@/features/invoice/server/build-invoice-html";
 import type { InvoiceConfig } from "@/features/invoice/types";
 
-export const runtime = "nodejs"; // Required because Puppeteer needs full Node.js runtime
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const html = buildInvoiceHtml(body);
 
     const browser = await puppeteer.launch({
-      headless: "new",
+      headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     await browser.close();
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

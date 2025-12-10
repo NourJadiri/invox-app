@@ -294,3 +294,57 @@ export async function getRecurringLessonInstances(
 
   return instances;
 }
+
+/**
+ * Syncs all lessons without googleEventId to Google Calendar.
+ * Returns the number of lessons synced.
+ */
+export async function syncLessonsToGoogleCalendar(
+  userId: string
+): Promise<{ synced: number; failed: number }> {
+  // Find all lessons that don't have a googleEventId yet
+  const unsyncedLessons = await prisma.lesson.findMany({
+    where: {
+      googleEventId: null,
+    },
+    include: {
+      student: true,
+    },
+  });
+
+  let synced = 0;
+  let failed = 0;
+
+  for (const lesson of unsyncedLessons) {
+    try {
+      const googleEvent: calendar_v3.Schema$Event = {
+        summary: lesson.title || "Lesson",
+        description: lesson.notes || undefined,
+        start: {
+          dateTime: new Date(lesson.start).toISOString(),
+          timeZone: "Europe/Paris",
+        },
+        end: {
+          dateTime: new Date(lesson.end).toISOString(),
+          timeZone: "Europe/Paris",
+        },
+        colorId: "11",
+      };
+
+      const createdEvent = await insertGoogleEvent(userId, googleEvent);
+
+      // Update the lesson with the googleEventId
+      await prisma.lesson.update({
+        where: { id: lesson.id },
+        data: { googleEventId: createdEvent.id },
+      });
+
+      synced++;
+    } catch (error) {
+      console.error(`Failed to sync lesson ${lesson.id}:`, error);
+      failed++;
+    }
+  }
+
+  return { synced, failed };
+}
