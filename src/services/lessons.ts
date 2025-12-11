@@ -76,9 +76,17 @@ export async function createLesson(
   // Sync with Google Calendar if user is authenticated
   if (userId) {
     try {
+      // Fetch student name for Google Calendar event title
+      const student = await prisma.student.findUnique({
+        where: { id: studentId },
+      });
+      const studentName = student
+        ? `${student.firstName} ${student.lastName}`.trim()
+        : "Unknown Student";
+
       const googleEvent: calendar_v3.Schema$Event = {
-        summary: title || "Lesson",
-        description: notes,
+        summary: `[CDP] ${studentName}`,
+        description: title || undefined, // Lesson title as event notes
         start: {
           dateTime: new Date(start).toISOString(),
           timeZone: "Europe/Paris",
@@ -212,9 +220,20 @@ export async function updateLesson(
   // Sync update with Google Calendar if applicable
   if (existingLesson?.googleEventId && userId) {
     try {
+      // Fetch student name for Google Calendar event title
+      const effectiveStudentId = studentId || existingLesson.studentId;
+      const student = effectiveStudentId
+        ? await prisma.student.findUnique({
+            where: { id: effectiveStudentId },
+          })
+        : null;
+      const studentName = student
+        ? `${student.firstName} ${student.lastName}`.trim()
+        : "Unknown Student";
+
       const googleEvent: Partial<calendar_v3.Schema$Event> = {
-        summary: title,
-        description: notes,
+        summary: `[CDP] ${studentName}`,
+        description: title || undefined, // Lesson title as event notes
         start: start
           ? { dateTime: new Date(start).toISOString() }
           : undefined,
@@ -317,9 +336,14 @@ export async function syncLessonsToGoogleCalendar(
 
   for (const lesson of unsyncedLessons) {
     try {
+      // Use student name for Google Calendar event title
+      const studentName = lesson.student
+        ? `${lesson.student.firstName} ${lesson.student.lastName}`.trim()
+        : "Unknown Student";
+
       const googleEvent: calendar_v3.Schema$Event = {
-        summary: lesson.title || "Lesson",
-        description: lesson.notes || undefined,
+        summary: `[CDP] ${studentName}`,
+        description: lesson.title || undefined, // Lesson title as event notes
         start: {
           dateTime: new Date(lesson.start).toISOString(),
           timeZone: "Europe/Paris",
