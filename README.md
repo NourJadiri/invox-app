@@ -222,7 +222,6 @@ invox-app/
 ├── next.config.ts             # Next.js configuration
 ├── package.json               # Dependencies and scripts
 ├── postcss.config.mjs         # PostCSS configuration
-├── tailwind.config.ts         # Tailwind CSS configuration
 └── tsconfig.json              # TypeScript configuration
 ```
 
