@@ -71,3 +71,43 @@ export async function deleteGoogleEvent(userId: string, eventId: string) {
     eventId: eventId,
   });
 }
+
+/**
+ * Validates if the user's Google OAuth token is still valid.
+ * Makes a lightweight API call to check token validity.
+ * Returns { valid: true } if token works, { valid: false, error: string } otherwise.
+ */
+export async function validateGoogleToken(userId: string): Promise<{ valid: boolean; error?: string }> {
+  try {
+    const account = await prisma.account.findFirst({
+      where: { userId, provider: "google" },
+    });
+
+    if (!account) {
+      return { valid: false, error: "No Google account linked" };
+    }
+
+    if (!account.refresh_token) {
+      return { valid: false, error: "No refresh token available" };
+    }
+
+    // Try to get the calendar client and make a lightweight request
+    const calendar = await getGoogleCalendarClient(userId);
+    
+    // Use calendarList.get which is a very lightweight call
+    await calendar.calendarList.get({ calendarId: "primary" });
+    
+    return { valid: true };
+  } catch (error) {
+    // Check if it's an invalid_grant error
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isInvalidGrant = errorMessage.includes("invalid_grant") || 
+                           (error && typeof error === "object" && "code" in error && error.code === 400);
+    
+    if (isInvalidGrant) {
+      return { valid: false, error: "Token expired or revoked. Please reconnect your Google account." };
+    }
+    
+    return { valid: false, error: errorMessage };
+  }
+}
