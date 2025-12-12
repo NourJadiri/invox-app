@@ -17,20 +17,29 @@ export default function ScheduleManager({ initialLessons }: { initialLessons: Le
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+    const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
 
     function handleCreateLesson() {
         setSelectedLesson(null);
-
+        setSelectedSlot(null);
         setIsFormOpen(true);
     }
 
     function handleEditLesson(lesson: Lesson) {
         setSelectedLesson(lesson);
+        setSelectedSlot(null);
+        setIsFormOpen(true);
+    }
+
+    function handleSelectSlot(slotInfo: { start: Date; end: Date }) {
+        setSelectedLesson(null);
+        setSelectedSlot(slotInfo);
         setIsFormOpen(true);
     }
 
     async function handleSaveLesson() {
         setIsFormOpen(false);
+        setSelectedSlot(null);
         router.refresh();
     }
 
@@ -50,6 +59,7 @@ export default function ScheduleManager({ initialLessons }: { initialLessons: Le
                         date={currentDate}
                         onDateChange={setCurrentDate}
                         onEditLesson={handleEditLesson}
+                        onSelectSlot={handleSelectSlot}
                     />
                 ) : (
                     <ListView
@@ -64,6 +74,8 @@ export default function ScheduleManager({ initialLessons }: { initialLessons: Le
                 onOpenChange={setIsFormOpen}
                 lesson={selectedLesson}
                 onSave={handleSaveLesson}
+                initialStart={selectedSlot?.start}
+                initialEnd={selectedSlot?.end}
             />
         </div>
     );

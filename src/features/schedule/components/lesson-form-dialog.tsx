@@ -18,9 +18,11 @@ type LessonFormDialogProps = {
     onOpenChange: (open: boolean) => void;
     lesson: Lesson | null;
     onSave: () => void;
+    initialStart?: Date;
+    initialEnd?: Date;
 };
 
-export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonFormDialogProps) {
+export function LessonFormDialog({ open, onOpenChange, lesson, onSave, initialStart, initialEnd }: LessonFormDialogProps) {
     const [students, setStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -53,13 +55,13 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
                 setRecurrent(lesson.recurrent);
                 setColor(lesson.color);
             } else {
-                // Create mode: reset form
+                // Create mode: use initial values if provided, otherwise use current time
                 setStudentId("");
-                const now = new Date();
-                setDate(format(now, "yyyy-MM-dd"));
-                setStartTime(format(now, "HH:mm"));
-                const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-                setEndTime(format(oneHourLater, "HH:mm"));
+                const startDate = initialStart || new Date();
+                const endDate = initialEnd || new Date(startDate.getTime() + 60 * 60 * 1000);
+                setDate(format(startDate, "yyyy-MM-dd"));
+                setStartTime(format(startDate, "HH:mm"));
+                setEndTime(format(endDate, "HH:mm"));
                 setTitle("");
                 setNotes("");
                 setPrice(null);
@@ -68,7 +70,7 @@ export function LessonFormDialog({ open, onOpenChange, lesson, onSave }: LessonF
             }
             setError(null);
         }
-    }, [open, lesson]);
+    }, [open, lesson, initialStart, initialEnd]);
 
     async function loadStudents() {
         try {

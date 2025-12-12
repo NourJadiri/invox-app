@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, dateFnsLocalizer, View, Views } from "react-big-calendar";
+import { Calendar, dateFnsLocalizer, View, Views, EventProps, SlotInfo } from "react-big-calendar";
 import { format } from "date-fns/format";
 import { parse } from "date-fns/parse";
 import { startOfWeek } from "date-fns/startOfWeek";
@@ -29,14 +29,23 @@ type CalendarViewProps = {
     date: Date;
     onDateChange: (date: Date) => void;
     onEditLesson: (lesson: Lesson) => void;
+    onSelectSlot?: (slotInfo: { start: Date; end: Date }) => void;
 };
 
+type CalendarEvent = {
+    id: string;
+    title: string;
+    start: Date;
+    end: Date;
+    resource: Lesson;
+};
 
 export function CalendarView({
     lessons,
     date,
     onDateChange,
     onEditLesson,
+    onSelectSlot,
 }: CalendarViewProps) {
     const [view, setView] = useState<View>(Views.MONTH);
 
@@ -47,6 +56,21 @@ export function CalendarView({
         end: new Date(lesson.end),
         resource: lesson,
     }));
+
+    // Create a view-aware event component wrapper
+    const renderEvent = (props: EventProps<CalendarEvent>) => (
+        <EventComponent
+            event={{ resource: props.event.resource, title: props.event.title }}
+            view={view}
+        />
+    );
+
+    // Handle slot selection (clicking on empty time slots)
+    const handleSelectSlot = (slotInfo: SlotInfo) => {
+        if (onSelectSlot) {
+            onSelectSlot({ start: slotInfo.start, end: slotInfo.end });
+        }
+    };
 
     return (
         <div className="h-[700px] p-6">
@@ -61,9 +85,13 @@ export function CalendarView({
                 view={view}
                 onView={setView}
                 onSelectEvent={(event) => onEditLesson(event.resource)}
+                onSelectSlot={handleSelectSlot}
+                selectable={view !== Views.MONTH}
+                step={60}
+                timeslots={1}
                 views={[Views.MONTH, Views.WEEK, Views.DAY]}
                 components={{
-                    event: EventComponent,
+                    event: renderEvent,
                 }}
                 culture="fr"
             />
