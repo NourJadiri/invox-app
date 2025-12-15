@@ -8,8 +8,16 @@ import type { CreateInvoiceInput, InvoiceWithStudents } from "./types/invoices";
 export async function createInvoice(input: CreateInvoiceInput): Promise<InvoiceWithStudents> {
   const { startDate, endDate, studentIds, total = 0 } = input;
 
+  // Get the last invoice number to auto-increment
+  const lastInvoice = await prisma.invoice.findFirst({
+    orderBy: { number: "desc" },
+    select: { number: true },
+  });
+  const nextNumber = (lastInvoice?.number ?? 0) + 1;
+
   const invoice = await prisma.invoice.create({
     data: {
+      number: nextNumber,
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       total,

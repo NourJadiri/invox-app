@@ -10,4 +10,6 @@ export interface InvoiceConfig {
   lessons: InvoiceLesson[];
   students: InvoiceStudent[];
   selectedStudentIds: string[];
+  number?: number;
+  date?: string;
 }

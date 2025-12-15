@@ -91,6 +91,8 @@ export default function InvoiceManager({ initialInvoices }: InvoiceManagerProps)
                 lessons: filteredLessons,
                 students,
                 selectedStudentIds,
+                number: invoice.number,
+                date: new Date(invoice.createdAt).toISOString(),
             });
         } catch (err) {
             console.error(err);

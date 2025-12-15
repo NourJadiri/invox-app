@@ -160,6 +160,11 @@ export function InvoiceFormDialog({ open, onOpenChange, onInvoiceGenerated, onIn
                 onInvoiceCreated(result.invoice);
             }
 
+            if (result.invoice) {
+                invoiceConfig.number = result.invoice.number;
+                invoiceConfig.date = new Date(result.invoice.createdAt).toISOString();
+            }
+
             onInvoiceGenerated(invoiceConfig);
         } finally {
             setLoading(false);

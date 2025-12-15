@@ -8,17 +8,19 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 12px;
   color: #020817;
-  background-color: #f9fafb;
-  padding: 24px;
+  background-color: #ffffff;
+  padding: 0;
+  margin: 0;
 }
 .invoice {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
 }
 .header {
   display: flex;
@@ -178,5 +180,24 @@ tfoot .value {
 }
 .content {
   padding: 16px 20px 20px 20px;
+}
+.student-header {
+  background: #f3f4f6;
+}
+.student-header td {
+  border-bottom: 1px solid #e5e7eb;
+}
+.student-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4338ca;
+  padding: 10px 10px;
+}
+.student-subtotal {
+  border-bottom: 2px solid #e5e7eb;
+}
+.student-subtotal td {
+  padding-top: 6px;
+  padding-bottom: 10px;
 }
 `;
