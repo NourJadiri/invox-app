@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { motion, AnimatePresence } from "motion/react";
@@ -193,9 +193,9 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
                                         const studentTotalHours = studentLessons.reduce((sum, lesson) => sum + getLessonDurationHours(lesson), 0);
 
                                         return (
-                                            <>
+                                            <Fragment key={student.id}>
                                                 {/* Student group header */}
-                                                <TableRow key={`header-${student.id}`} className="bg-muted/50 hover:bg-muted/50">
+                                                <TableRow className="bg-muted/50 hover:bg-muted/50">
                                                     <TableCell colSpan={5} className="font-semibold text-primary py-3">
                                                         {student.firstName} {student.lastName}
                                                     </TableCell>
@@ -248,7 +248,7 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
                                                         {studentTotal.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}
                                                     </TableCell>
                                                 </TableRow>
-                                            </>
+                                            </Fragment>
                                         );
                                     })}
                                 </TableBody>
