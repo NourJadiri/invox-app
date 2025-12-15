@@ -111,3 +111,45 @@ export async function validateGoogleToken(userId: string): Promise<{ valid: bool
     return { valid: false, error: errorMessage };
   }
 }
+
+/**
+ * Lists events from Google Calendar within a date range.
+ * Optionally filters by events starting with a specific prefix in the summary.
+ */
+export async function listGoogleCalendarEvents(
+  userId: string,
+  options: {
+    timeMin?: Date;
+    timeMax?: Date;
+    maxResults?: number;
+    summaryPrefix?: string;
+  } = {}
+): Promise<calendar_v3.Schema$Event[]> {
+  const calendar = await getGoogleCalendarClient(userId);
+
+  const params: calendar_v3.Params$Resource$Events$List = {
+    calendarId: "primary",
+    singleEvents: true,
+    orderBy: "startTime",
+    maxResults: options.maxResults ?? 250,
+  };
+
+  if (options.timeMin) {
+    params.timeMin = options.timeMin.toISOString();
+  }
+  if (options.timeMax) {
+    params.timeMax = options.timeMax.toISOString();
+  }
+
+  const response = await calendar.events.list(params);
+  let events = response.data.items ?? [];
+
+  // Filter by summary prefix if provided
+  if (options.summaryPrefix) {
+    events = events.filter((event) =>
+      event.summary?.startsWith(options.summaryPrefix!)
+    );
+  }
+
+  return events;
+}

@@ -50,6 +50,7 @@ export default function ScheduleManager({ initialLessons }: { initialLessons: Le
                 onViewChange={setView}
                 onNewLesson={handleCreateLesson}
                 onSync={syncToGoogleCalendarAction}
+                onImportComplete={() => router.refresh()}
             />
 
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm">

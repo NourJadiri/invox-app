@@ -2,15 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, List, Plus, Check, RefreshCw, AlertTriangle } from "lucide-react";
+import { Calendar, List, Plus, Check, RefreshCw, AlertTriangle, Download } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
-import { checkGoogleTokenAction } from "../actions";
+import { checkGoogleTokenAction, importFromGoogleCalendarAction } from "../actions";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ScheduleHeaderProps {
     view: "calendar" | "list";
     onViewChange: (view: "calendar" | "list") => void;
     onNewLesson: () => void;
     onSync?: () => Promise<{ success: boolean; synced?: number; failed?: number; error?: string }>;
+    onImportComplete?: () => void;
 }
 
 export function ScheduleHeader({
@@ -18,11 +28,21 @@ export function ScheduleHeader({
     onViewChange,
     onNewLesson,
     onSync,
+    onImportComplete,
 }: ScheduleHeaderProps) {
     const { data: session, status } = useSession();
     const [syncing, setSyncing] = useState(false);
     const [syncResult, setSyncResult] = useState<{ synced: number; failed: number } | null>(null);
     const [tokenStatus, setTokenStatus] = useState<"checking" | "valid" | "invalid">("checking");
+    const [importDialogOpen, setImportDialogOpen] = useState(false);
+    const [importing, setImporting] = useState(false);
+    const [importStartDate, setImportStartDate] = useState("");
+    const [importEndDate, setImportEndDate] = useState("");
+    const [importResult, setImportResult] = useState<{
+        imported: number;
+        skipped: number;
+        studentsCreated: number;
+    } | null>(null);
 
     // Check token validity when session is available
     useEffect(() => {
@@ -62,6 +82,31 @@ export function ScheduleHeader({
             }
         } finally {
             setSyncing(false);
+        }
+    }
+
+    async function handleImport() {
+        setImporting(true);
+        setImportResult(null);
+
+        try {
+            const result = await importFromGoogleCalendarAction({
+                startDate: importStartDate || undefined,
+                endDate: importEndDate || undefined,
+            });
+
+            if (result.success) {
+                setImportResult({
+                    imported: result.imported ?? 0,
+                    skipped: result.skipped ?? 0,
+                    studentsCreated: result.studentsCreated ?? 0,
+                });
+                onImportComplete?.();
+            } else {
+                console.error(result.error);
+            }
+        } finally {
+            setImporting(false);
         }
     }
 
@@ -113,6 +158,15 @@ export function ScheduleHeader({
                 <Button variant="outline" size="sm" className="gap-2" disabled>
                     <Check className="h-4 w-4" />
                     <span className="hidden sm:inline">Connected</span>
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setImportDialogOpen(true)}
+                    className="gap-2"
+                >
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">Import</span>
                 </Button>
                 <Button
                     variant="outline"
@@ -181,6 +235,66 @@ export function ScheduleHeader({
                     New Lesson
                 </Button>
             </div>
+
+            {/* Import Dialog */}
+            <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Download className="h-5 w-5" />
+                            Import from Google Calendar
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <p className="text-sm text-muted-foreground">
+                            Import lessons from your Google Calendar. Events with titles starting with <code className="bg-muted px-1 py-0.5 rounded text-xs">[CDP]</code> will be imported.
+                        </p>
+                        <div className="space-y-2">
+                            <Label htmlFor="importStartDate">Start date (optional)</Label>
+                            <Input
+                                id="importStartDate"
+                                type="date"
+                                value={importStartDate}
+                                onChange={(e) => setImportStartDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="importEndDate">End date (optional)</Label>
+                            <Input
+                                id="importEndDate"
+                                type="date"
+                                value={importEndDate}
+                                onChange={(e) => setImportEndDate(e.target.value)}
+                            />
+                        </div>
+                        {importResult && (
+                            <div className="text-sm bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3 space-y-1">
+                                <p className="font-medium text-green-700 dark:text-green-300">Import completed!</p>
+                                <p className="text-green-600 dark:text-green-400">
+                                    {importResult.imported} lessons imported, {importResult.skipped} skipped
+                                    {importResult.studentsCreated > 0 && `, ${importResult.studentsCreated} new students created`}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setImportDialogOpen(false);
+                                setImportResult(null);
+                                setImportStartDate("");
+                                setImportEndDate("");
+                            }}
+                        >
+                            Close
+                        </Button>
+                        <Button onClick={handleImport} disabled={importing}>
+                            {importing ? "Importing..." : "Import"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </header>
     );
 }

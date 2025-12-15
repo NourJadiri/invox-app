@@ -3,6 +3,7 @@ import {
   insertGoogleEvent,
   updateGoogleEvent,
   deleteGoogleEvent,
+  listGoogleCalendarEvents,
 } from "@/lib/google-calendar";
 import { calendar_v3 } from "googleapis";
 import type {
@@ -371,4 +372,124 @@ export async function syncLessonsToGoogleCalendar(
   }
 
   return { synced, failed };
+}
+
+/**
+ * Imports lessons from Google Calendar.
+ * Looks for events with titles starting with "[CDP]" followed by student name.
+ * Creates students if they don't exist.
+ * Skips events that are already imported (by googleEventId).
+ */
+export async function importLessonsFromGoogleCalendar(
+  userId: string,
+  options: {
+    timeMin?: Date;
+    timeMax?: Date;
+  } = {}
+): Promise<{ imported: number; skipped: number; studentsCreated: number; errors: string[] }> {
+  const CDP_PREFIX = "[CDP] ";
+  const errors: string[] = [];
+  let imported = 0;
+  let skipped = 0;
+  let studentsCreated = 0;
+
+  // Fetch events from Google Calendar with [CDP] prefix
+  const events = await listGoogleCalendarEvents(userId, {
+    timeMin: options.timeMin,
+    timeMax: options.timeMax,
+    summaryPrefix: CDP_PREFIX,
+    maxResults: 500,
+  });
+
+  // Get all existing googleEventIds to avoid duplicates
+  const existingLessons = await prisma.lesson.findMany({
+    where: {
+      googleEventId: { not: null },
+    },
+    select: { googleEventId: true },
+  });
+  const existingEventIds = new Set(existingLessons.map((l) => l.googleEventId));
+
+  // Cache for students to avoid repeated lookups
+  const studentCache = new Map<string, string>(); // normalized name -> studentId
+
+  // Preload existing students
+  const allStudents = await prisma.student.findMany();
+  for (const student of allStudents) {
+    const normalizedName = `${student.firstName} ${student.lastName}`.toLowerCase().trim();
+    studentCache.set(normalizedName, student.id);
+  }
+
+  for (const event of events) {
+    try {
+      // Skip if already imported
+      if (event.id && existingEventIds.has(event.id)) {
+        skipped++;
+        continue;
+      }
+
+      // Parse student name from title
+      const summary = event.summary ?? "";
+      if (!summary.startsWith(CDP_PREFIX)) {
+        continue;
+      }
+
+      const studentName = summary.slice(CDP_PREFIX.length).trim();
+      if (!studentName) {
+        errors.push(`Event "${event.id}" has no student name after [CDP] prefix`);
+        continue;
+      }
+
+      // Parse start and end times
+      const startDateTime = event.start?.dateTime || event.start?.date;
+      const endDateTime = event.end?.dateTime || event.end?.date;
+
+      if (!startDateTime || !endDateTime) {
+        errors.push(`Event "${event.id}" is missing start or end time`);
+        continue;
+      }
+
+      // Find or create student
+      const normalizedStudentName = studentName.toLowerCase().trim();
+      let studentId = studentCache.get(normalizedStudentName);
+
+      if (!studentId) {
+        // Split name into first and last name
+        const nameParts = studentName.split(/\s+/);
+        const firstName = nameParts[0] ?? studentName;
+        const lastName = nameParts.slice(1).join(" ") || "";
+
+        // Create the student
+        const newStudent = await prisma.student.create({
+          data: {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+          },
+        });
+
+        studentId = newStudent.id;
+        studentCache.set(normalizedStudentName, studentId);
+        studentsCreated++;
+      }
+
+      // Create the lesson
+      await prisma.lesson.create({
+        data: {
+          title: event.description || null, // Use event description as lesson title
+          start: new Date(startDateTime),
+          end: new Date(endDateTime),
+          studentId,
+          googleEventId: event.id,
+          recurrent: false,
+        },
+      });
+
+      imported++;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      errors.push(`Failed to import event "${event.id}": ${errorMessage}`);
+    }
+  }
+
+  return { imported, skipped, studentsCreated, errors };
 }

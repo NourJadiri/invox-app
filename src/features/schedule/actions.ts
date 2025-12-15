@@ -1,7 +1,7 @@
 "use server"
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { createLesson, CreateLessonInput, updateLesson, UpdateLessonInput, deleteLesson, syncLessonsToGoogleCalendar } from "@/services";
+import { createLesson, CreateLessonInput, updateLesson, UpdateLessonInput, deleteLesson, syncLessonsToGoogleCalendar, importLessonsFromGoogleCalendar } from "@/services";
 import { validateGoogleToken } from "@/lib/google-calendar";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
@@ -122,3 +122,54 @@ export const checkGoogleTokenAction = async () => {
     }
 }
 
+export interface ImportFromGoogleCalendarInput {
+    startDate?: string;
+    endDate?: string;
+}
+
+/**
+ * Imports lessons from Google Calendar.
+ * Events are identified by titles starting with "[CDP]" followed by student name.
+ * Creates students if they don't already exist.
+ */
+export const importFromGoogleCalendarAction = async (input?: ImportFromGoogleCalendarInput) => {
+    try {
+        const session = await getServerSession(authOptions);
+        const userId = session?.user?.id;
+
+        if (!userId) {
+            return {
+                success: false,
+                error: "You must be signed in with Google to import lessons.",
+            };
+        }
+
+        const options: { timeMin?: Date; timeMax?: Date } = {};
+
+        if (input?.startDate) {
+            options.timeMin = new Date(input.startDate);
+        }
+        if (input?.endDate) {
+            options.timeMax = new Date(input.endDate);
+        }
+
+        const result = await importLessonsFromGoogleCalendar(userId, options);
+
+        revalidatePath("/schedule");
+        revalidatePath("/students");
+
+        return {
+            success: true,
+            imported: result.imported,
+            skipped: result.skipped,
+            studentsCreated: result.studentsCreated,
+            errors: result.errors,
+        };
+    } catch (error) {
+        console.error("Server Action Error:", error);
+        return {
+            success: false,
+            error: "Failed to import from Google Calendar. Please try again later.",
+        };
+    }
+};
