@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 import { buildInvoiceHtml } from "@/features/invoice/server/build-invoice-html";
 import type { InvoiceConfig } from "@/features/invoice/types";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale/fr";
 
 export const runtime = "nodejs";
 
@@ -32,11 +34,17 @@ export async function POST(request: NextRequest) {
 
     await browser.close();
 
+    const dateForFilename = new Date(body.startDate);
+    const month = format(dateForFilename, "MMMM", { locale: fr });
+    const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+    const year = format(dateForFilename, "yyyy", { locale: fr });
+    const filename = `Facture ${capitalizedMonth} ${year}.pdf`;
+
     return new NextResponse(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": "attachment; filename=invoice.pdf",
+        "Content-Disposition": `attachment; filename=${filename}`,
       },
     });
   } catch (error) {

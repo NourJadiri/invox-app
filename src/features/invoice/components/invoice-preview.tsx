@@ -78,8 +78,14 @@ export function InvoicePreview({ config }: InvoicePreviewProps) {
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
+            const dateForFilename = new Date(startDate);
+            const monthName = format(dateForFilename, "MMMM", { locale: fr });
+            const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            const year = format(dateForFilename, "yyyy", { locale: fr });
+            const filename = `Facture ${capitalizedMonth} ${year}.pdf`;
+
             a.href = url;
-            a.download = "invoice.pdf";
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
