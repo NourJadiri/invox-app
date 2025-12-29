@@ -25,10 +25,10 @@ export async function POST(request: NextRequest) {
       format: "A4",
       printBackground: true,
       margin: {
-        top: "20mm",
-        right: "15mm",
-        bottom: "20mm",
-        left: "15mm",
+        top: "0",
+        right: "0",
+        bottom: "0",
+        left: "0",
       },
     });
 

@@ -1,203 +1,182 @@
 export const INVOICE_CSS = `
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
+
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 12px;
-  color: #020817;
-  background-color: #ffffff;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  font-size: 11px;
+  color: #000;
+  background-color: #fff;
+  line-height: 1.3;
 }
+
 .invoice {
   width: 100%;
-  max-width: 100%;
-  margin: 0;
-  background: #ffffff;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  overflow: visible;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 15mm; /* Moderate padding to maximize space */
 }
+
+/* Header */
 .header {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
-  padding: 20px 24px 12px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
 }
-.header-left {
-  flex: 1;
-}
-.header-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 11px;
-}
-.issuer-name {
-  font-size: 16px;
-  font-weight: 700;
+
+.header-left .issuer-name {
+  font-size: 14px;
+  font-weight: bold;
   margin-bottom: 4px;
 }
 .issuer-line {
   font-size: 11px;
-  color: #4b5563;
+  color: #333;
 }
+
+.header-right {
+  text-align: right;
+  font-size: 11px;
+}
+
 .section-label {
-  font-size: 10px;
-  font-weight: 600;
+  font-weight: bold;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #9ca3af;
+  font-size: 9px;
+  color: #666;
+  margin-top: 8px;
   margin-bottom: 2px;
 }
+.section-label:first-child { margin-top: 0; }
+
 .meta-value {
-  font-size: 11px;
-  color: #111827;
+  font-weight: bold;
 }
-.meta-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-.meta-row > div {
-  flex: 1;
-}
+
+/* Title Row */
 .invoice-title-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 0 24px 12px 24px;
+  margin-bottom: 15px;
 }
+
 .title {
   font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 2px;
+  font-weight: bold;
 }
 .subtitle {
-  font-size: 12px;
-  color: #6b7280;
+  font-size: 11px;
+  color: #555;
+}
+
+.total-block {
+  text-align: right;
 }
 .total-label {
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #9ca3af;
+  color: #666;
 }
 .total-value {
-  font-size: 20px;
-  font-weight: 700;
-  margin-top: 4px;
+  font-size: 18px;
+  font-weight: bold;
 }
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 10px;
-  background: #f3f4ff;
-  color: #4338ca;
-  margin-top: 4px;
-}
+
+/* Summary Chips (keep them small) */
 .summary {
-  padding: 16px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  margin-bottom: 15px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
 }
 .summary-title {
-  font-size: 11px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-size: 10px;
+  text-transform: uppercase;
 }
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 .chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 2px 6px;
   font-size: 10px;
 }
-.chip-amount {
-  font-weight: 600;
-}
+.chip span:first-child { color: #555; margin-right: 4px; }
+.chip-amount { font-weight: bold; }
+
+/* Table */
 table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
 }
-thead {
-  background: #f9fafb;
-}
+
 th {
   text-align: left;
-  padding: 8px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #4b5563;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid #000;
+  padding: 4px 6px;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
 }
-.cell {
-  padding: 8px 10px;
-  border-bottom: 1px solid #f3f4f6;
-  font-size: 11px;
+
+td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #eee;
   vertical-align: top;
 }
-.cell.date {
-  white-space: nowrap;
-}
-.cell.title {
-  max-width: 260px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.cell.amount {
-  text-align: right;
-  white-space: nowrap;
-}
-tfoot td {
-  padding: 8px 10px;
-  font-weight: 600;
-  border-top: 1px solid #e5e7eb;
-}
-tfoot .label {
-  text-align: right;
-}
-tfoot .value {
-  text-align: right;
-}
-.content {
-  padding: 16px 20px 20px 20px;
-}
-.student-header {
-  background: #f3f4f6;
-}
+
 .student-header td {
-  border-bottom: 1px solid #e5e7eb;
-}
-.student-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: #4338ca;
-  padding: 10px 10px;
-}
-.student-subtotal {
-  border-bottom: 2px solid #e5e7eb;
+  background-color: #f0f0f0;
+  font-weight: bold;
+  padding-top: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #ccc;
 }
 .student-subtotal td {
-  padding-top: 6px;
-  padding-bottom: 10px;
+  border-bottom: 2px solid #ccc;
+  font-weight: bold;
+  background-color: #fafafa;
+}
+
+/* Alignments */
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+/* Column Widths (Adjusted for compactness) */
+.col-date { width: 15%; }
+.col-title { width: 45%; }
+.col-hours { width: 10%; text-align: right; }
+.col-rate { width: 15%; text-align: right; }
+.col-total { width: 15%; text-align: right; }
+
+tfoot td {
+  padding-top: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  border-top: 2px solid #000;
+}
+
+.footer {
+  margin-top: 30px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+  font-size: 9px;
+  color: #555;
+  text-align: center;
+}
+.footer p {
+  margin: 2px 0;
 }
 `;

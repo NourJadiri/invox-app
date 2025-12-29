@@ -68,7 +68,7 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
       // Student header row
       const headerRow = `
         <tr class="student-header">
-          <td colspan="5" class="student-name">${student.firstName} ${student.lastName}</td>
+          <td colspan="5">${student.firstName} ${student.lastName}</td>
         </tr>
       `;
 
@@ -95,11 +95,11 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
 
           return `
             <tr>
-              <td class="cell date" style="padding-left: 16px;">${dateLabel}</td>
-              <td class="cell title">${lesson.title || "Leçon"}</td>
-              <td class="cell amount" style="text-align: right;">${hoursLabel}</td>
-              <td class="cell amount" style="text-align: right;">${hourlyRateLabel}</td>
-              <td class="cell amount" style="text-align: right;">${totalLabel}</td>
+              <td class="text-left">${dateLabel}</td>
+              <td class="text-left">${lesson.title || "Leçon"}</td>
+              <td class="text-right">${hoursLabel}</td>
+              <td class="text-right">${hourlyRateLabel}</td>
+              <td class="text-right">${totalLabel}</td>
             </tr>
           `;
         })
@@ -108,10 +108,10 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
       // Subtotal row for this student
       const subtotalRow = `
         <tr class="student-subtotal">
-          <td colspan="2" class="cell" style="text-align: right; font-weight: 500; color: #6b7280;">Sous-total pour ${student.firstName}</td>
-          <td class="cell amount" style="text-align: right; font-weight: 500; color: #6b7280;">${studentTotalHoursLabel}</td>
-          <td class="cell"></td>
-          <td class="cell amount" style="text-align: right; font-weight: 600;">${studentTotalLabel}</td>
+          <td colspan="2" class="text-right" style="color: #6b7280; padding-right: 20px;">Sous-total pour ${student.firstName}</td>
+          <td class="text-right" style="color: #6b7280;">${studentTotalHoursLabel}</td>
+          <td></td>
+          <td class="text-right">${studentTotalLabel}</td>
         </tr>
       `;
 
@@ -151,31 +151,22 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
         <div class="header-left">
           <div class="issuer-name">Mohamed-Nour Eljadiri</div>
           <div class="issuer-line">Siret : 93210872300010</div>
-          <div class="issuer-line">Adresse postale : 34 Rue Antoine Charial</div>
-          <div class="issuer-line">Code postal, Ville : 69003, Lyon</div>
-          <div class="issuer-line">Téléphone : 07 49 49 43 03</div>
+          <div class="issuer-line">34 Rue Antoine Charial</div>
+          <div class="issuer-line">69003, Lyon</div>
+          <div class="issuer-line">07 49 49 43 03</div>
         </div>
         <div class="header-right">
           <div>
-            <div class="section-label">Détails de la facture</div>
-            <div class="meta-row">
-              <div>
-                <div class="meta-value">DATE : ${invoiceDate}</div>
-              </div>
-              <div>
-                <div class="meta-value">N° FACTURE ${config.number ?? "—"}</div>
-              </div>
-            </div>
-            <div class="meta-value">POUR : Cours particuliers</div>
-            <div class="meta-value" style="margin-top: 4px; font-size: 10px; color: #6b7280;">TVA non applicable, art. 293 B du CGI</div>
-          </div>
-          <div>
-            <div class="section-label">FACTURER À</div>
-            <div class="meta-value">Nom : Mathilde SALINAS</div>
-            <div class="meta-value">Nom société : COURS DES POSSIBLES</div>
-            <div class="meta-value">Adresse postale : 10 B Rue Jangot</div>
-            <div class="meta-value">Code postal, Ville : 69007, Lyon</div>
-            <div class="meta-value">Téléphone : 07 81 81 52 18</div>
+            <div class="section-label">Détails</div>
+            <div class="meta-value">DATE : ${invoiceDate}</div>
+            <div class="meta-value">N° : ${config.number ?? "—"}</div>
+            
+            <div class="section-label">Facturé à</div>
+            <div class="meta-value">Mathilde SALINAS</div>
+            <div class="meta-value">COURS DES POSSIBLES</div>
+            <div class="meta-value" style="font-weight: 400; color: #4b5563;">10 B Rue Jangot<br>69007, Lyon</div>
+            
+            <div style="margin-top: 12px; font-size: 10px; color: #9ca3af;">TVA non applicable, art. 293 B du CGI</div>
           </div>
         </div>
       </div>
@@ -184,20 +175,21 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
       <div class="invoice-title-row">
         <div>
           <div class="title">Facture</div>
-          <div class="subtitle">Leçons du ${formattedStart} au ${formattedEnd}</div>
+          <div class="subtitle">Période du ${formattedStart} au ${formattedEnd}</div>
         </div>
-        <div style="text-align: right;">
-          <div class="total-label">Total dû</div>
+        <div class="total-block">
+          <div class="total-label">Total à payer</div>
           <div class="total-value">${grandTotalLabel}</div>
-          <div class="badge">
-            ${selectedStudents.length} ${selectedStudents.length === 1 ? "élève" : "élèves"}
-          </div>
         </div>
       </div>
 
       <div class="summary">
-        <div class="summary-title">Récapitulatif par élève</div>
+        <div class="summary-title">Récapitulatif</div>
         <div class="chips">
+          <div class="chip" style="background: #f3f4f6; border-color: transparent;">
+             <span>Élèves</span>
+             <span class="chip-amount">${selectedStudents.length}</span>
+          </div>
           ${summaryChips}
         </div>
       </div>
@@ -206,11 +198,11 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
         <table>
           <thead>
             <tr>
-              <th style="width: 120px;">Date</th>
-              <th>Intitulé</th>
-              <th style="width: 80px; text-align: right;">Heures</th>
-              <th style="width: 120px; text-align: right;">Taux horaire</th>
-              <th style="width: 120px; text-align: right;">Total</th>
+              <th class="col-date">Date</th>
+              <th class="col-title">Intitulé</th>
+              <th class="col-hours">Heures</th>
+              <th class="col-rate">Taux</th>
+              <th class="col-total">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -218,11 +210,16 @@ export function buildInvoiceHtml(config: InvoiceConfig) {
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="4" class="label">Total dû</td>
-              <td class="value">${grandTotalLabel}</td>
+              <td colspan="4" style="text-align: right;">Total net à payer</td>
+              <td class="text-right">${grandTotalLabel}</td>
             </tr>
           </tfoot>
         </table>
+      </div>
+
+      <div class="footer">
+        <p>Conditions de paiement : Paiement à réception de facture, net sans escompte.</p>
+        <p>En cas de retard de paiement, indemnité forfaitaire pour frais de recouvrement : 40 € (art. D.441-5 C. Com.)</p>
       </div>
     </div>
   </body>
