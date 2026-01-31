@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, List, Plus, Check, RefreshCw, AlertTriangle, Download } from "lucide-react";
+import { Calendar, List, Plus, Check, RefreshCw, AlertTriangle, Download, Coins } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 import { checkGoogleTokenAction, importFromGoogleCalendarAction } from "../actions";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ApplyDefaultPricesDialog } from "./apply-default-prices-dialog";
 
 interface ScheduleHeaderProps {
     view: "calendar" | "list";
@@ -21,6 +22,7 @@ interface ScheduleHeaderProps {
     onNewLesson: () => void;
     onSync?: () => Promise<{ success: boolean; synced?: number; failed?: number; error?: string }>;
     onImportComplete?: () => void;
+    onApplyPricesComplete?: () => void;
 }
 
 export function ScheduleHeader({
@@ -29,6 +31,7 @@ export function ScheduleHeader({
     onNewLesson,
     onSync,
     onImportComplete,
+    onApplyPricesComplete,
 }: ScheduleHeaderProps) {
     const { data: session, status } = useSession();
     const [syncing, setSyncing] = useState(false);
@@ -43,6 +46,7 @@ export function ScheduleHeader({
         skipped: number;
         studentsCreated: number;
     } | null>(null);
+    const [applyPricesDialogOpen, setApplyPricesDialogOpen] = useState(false);
 
     // Check token validity when session is available
     useEffect(() => {
@@ -210,7 +214,7 @@ export function ScheduleHeader({
             </div>
             <div className="flex items-center gap-2">
                 {renderGoogleButtons()}
-                <div className="flex items-center rounded-md border bg-muted/50 p-1">
+<div className="flex items-center rounded-md border bg-muted/50 p-1">
                     <Button
                         variant={view === "calendar" ? "secondary" : "ghost"}
                         size="sm"
@@ -230,6 +234,15 @@ export function ScheduleHeader({
                         <span className="hidden sm:inline">List</span>
                     </Button>
                 </div>
+                <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => setApplyPricesDialogOpen(true)}
+                    className="gap-2"
+                >
+                    <Coins className="h-4 w-4" />
+                    <span className="hidden sm:inline">Apply Prices</span>
+                </Button>
                 <Button size="lg" onClick={onNewLesson} className="gap-2">
                     <Plus className="h-4 w-4" />
                     New Lesson
@@ -277,7 +290,7 @@ export function ScheduleHeader({
                             </div>
                         )}
                     </div>
-                    <DialogFooter>
+<DialogFooter>
                         <Button
                             variant="outline"
                             onClick={() => {
@@ -295,6 +308,13 @@ export function ScheduleHeader({
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Apply Default Prices Dialog */}
+            <ApplyDefaultPricesDialog
+                open={applyPricesDialogOpen}
+                onOpenChange={setApplyPricesDialogOpen}
+                onSuccess={onApplyPricesComplete}
+            />
         </header>
     );
 }

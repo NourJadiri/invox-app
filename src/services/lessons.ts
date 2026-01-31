@@ -509,3 +509,59 @@ export async function importLessonsFromGoogleCalendar(
 
   return { imported, skipped, studentsCreated, errors };
 }
+
+/**
+ * Applies default lesson prices to all lessons within a date range.
+ * Only updates lessons where the student has a defaultLessonPrice set.
+ * Returns the number of lessons updated.
+ */
+export async function applyDefaultPricesToLessons(
+  startDate: Date,
+  endDate: Date
+): Promise<{ updated: number; errors: string[] }> {
+  const errors: string[] = [];
+  let updated = 0;
+
+  try {
+    // Find all lessons in the date range that don't have a price set
+    // or where we want to apply the default price
+    const lessons = await prisma.lesson.findMany({
+      where: {
+        start: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      include: {
+        student: true,
+      },
+    });
+
+    // Filter lessons where the student has a default price
+    const lessonsToUpdate = lessons.filter(
+      (lesson) => lesson.student?.defaultLessonPrice !== null && lesson.student?.defaultLessonPrice !== undefined
+    );
+
+    // Update each lesson with the student's default price
+    for (const lesson of lessonsToUpdate) {
+      try {
+        await prisma.lesson.update({
+          where: { id: lesson.id },
+          data: {
+            price: lesson.student!.defaultLessonPrice,
+          },
+        });
+        updated++;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        errors.push(`Failed to update lesson "${lesson.id}": ${errorMessage}`);
+      }
+    }
+
+    return { updated, errors };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    errors.push(`Failed to fetch lessons: ${errorMessage}`);
+    return { updated, errors };
+  }
+}

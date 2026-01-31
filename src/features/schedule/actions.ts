@@ -1,7 +1,7 @@
 "use server"
 
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { createLesson, CreateLessonInput, updateLesson, UpdateLessonInput, deleteLesson, syncLessonsToGoogleCalendar, importLessonsFromGoogleCalendar } from "@/services";
+import { createLesson, CreateLessonInput, updateLesson, UpdateLessonInput, deleteLesson, syncLessonsToGoogleCalendar, importLessonsFromGoogleCalendar, applyDefaultPricesToLessons } from "@/services";
 import { validateGoogleToken } from "@/lib/google-calendar";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
@@ -170,6 +170,41 @@ export const importFromGoogleCalendarAction = async (input?: ImportFromGoogleCal
         return {
             success: false,
             error: "Failed to import from Google Calendar. Please try again later.",
+        };
+    }
+};
+
+export interface ApplyDefaultPricesInput {
+    startDate: string;
+    endDate: string;
+}
+
+/**
+ * Applies default lesson prices to all lessons within a date range.
+ * Only updates lessons where the student has a defaultLessonPrice set.
+ */
+export const applyDefaultPricesAction = async (input: ApplyDefaultPricesInput) => {
+    try {
+        const startDate = new Date(input.startDate);
+        const endDate = new Date(input.endDate);
+
+        // Set end date to end of day to include all lessons on that day
+        endDate.setHours(23, 59, 59, 999);
+
+        const result = await applyDefaultPricesToLessons(startDate, endDate);
+
+        revalidatePath("/schedule");
+
+        return {
+            success: true,
+            updated: result.updated,
+            errors: result.errors,
+        };
+    } catch (error) {
+        console.error("Server Action Error:", error);
+        return {
+            success: false,
+            error: "Failed to apply default prices. Please try again later.",
         };
     }
 };
