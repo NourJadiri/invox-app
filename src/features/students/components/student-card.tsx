@@ -108,6 +108,17 @@ export function StudentCard({ student, onEdit, onDelete }: StudentCardProps) {
                         )}
                     </div>
 
+<div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="h-4 w-4 flex items-center justify-center text-sm">€</span>
+                        {student.defaultLessonPrice ? (
+                            <span className="font-medium text-foreground">
+                                {student.defaultLessonPrice.toFixed(2)} €/hr
+                            </span>
+                        ) : (
+                            <span className="text-muted-foreground/50 italic text-xs">No default price</span>
+                        )}
+                    </div>
+
                     <div className="flex items-start gap-2 text-muted-foreground">
                         <FileText className="h-4 w-4 mt-0.5" />
                         {student.notes ? (
