@@ -36,11 +36,18 @@ export default function StudentsManager({ initialStudents }: { initialStudents: 
         setStudentBeingEdited(null);
     }
 
-    function handleDraftChange(
+function handleDraftChange(
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) {
         const { name, value } = e.target;
-        setDraft((prev) => ({ ...prev, [name]: value }));
+        
+        // Handle defaultLessonPrice as number
+        if (name === "defaultLessonPrice") {
+            const numValue = value === "" ? null : parseFloat(value);
+            setDraft((prev) => ({ ...prev, [name]: numValue }));
+        } else {
+            setDraft((prev) => ({ ...prev, [name]: value }));
+        }
     }
 
     async function handleDraftValidate() {
