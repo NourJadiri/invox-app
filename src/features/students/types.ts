@@ -8,6 +8,7 @@ export type StudentDraft = {
   email: string;
   phone: string;
   notes: string;
+  defaultLessonPrice: number | null;
 };
 
 export const emptyStudentDraft: StudentDraft = {
@@ -16,6 +17,7 @@ export const emptyStudentDraft: StudentDraft = {
   email: "",
   phone: "",
   notes: "",
+  defaultLessonPrice: null,
 };
 
 export type StudentFormValues = StudentDraft;

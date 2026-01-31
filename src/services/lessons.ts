@@ -73,14 +73,23 @@ export async function createLesson(
     input;
 
   let googleEventId: string | undefined;
+  let studentDefaultPrice: number | null = null;
+
+  // Fetch student to get default lesson price and name
+  const student = await prisma.student.findUnique({
+    where: { id: studentId },
+  });
+
+  if (student) {
+    studentDefaultPrice = student.defaultLessonPrice ?? null;
+  }
+
+  // Use provided price or fall back to student's default price
+  const effectivePrice = price ?? studentDefaultPrice ?? undefined;
 
   // Sync with Google Calendar if user is authenticated
   if (userId) {
     try {
-      // Fetch student name for Google Calendar event title
-      const student = await prisma.student.findUnique({
-        where: { id: studentId },
-      });
       const studentName = student
         ? `${student.firstName} ${student.lastName}`.trim()
         : "Unknown Student";
@@ -114,7 +123,7 @@ export async function createLesson(
   // If it's a recurring lesson, create the template and instances
   if (recurrent) {
     const templateLesson = await createRecurringLesson(
-      { title, start, end, notes, studentId, price, color },
+      { title, start, end, notes, studentId, price: effectivePrice, color },
       googleEventId
     );
     return templateLesson;
@@ -127,7 +136,7 @@ export async function createLesson(
       start: new Date(start),
       end: new Date(end),
       notes,
-      price,
+      price: effectivePrice,
       recurrent: false,
       color,
       studentId,
@@ -411,13 +420,16 @@ export async function importLessonsFromGoogleCalendar(
   const existingEventIds = new Set(existingLessons.map((l) => l.googleEventId));
 
   // Cache for students to avoid repeated lookups
-  const studentCache = new Map<string, string>(); // normalized name -> studentId
+  const studentCache = new Map<string, { id: string; defaultLessonPrice: number | null }>(); // normalized name -> student info
 
   // Preload existing students
   const allStudents = await prisma.student.findMany();
   for (const student of allStudents) {
     const normalizedName = `${student.firstName} ${student.lastName}`.toLowerCase().trim();
-    studentCache.set(normalizedName, student.id);
+    studentCache.set(normalizedName, {
+      id: student.id,
+      defaultLessonPrice: student.defaultLessonPrice ?? null,
+    });
   }
 
   for (const event of events) {
@@ -451,9 +463,9 @@ export async function importLessonsFromGoogleCalendar(
 
       // Find or create student
       const normalizedStudentName = studentName.toLowerCase().trim();
-      let studentId = studentCache.get(normalizedStudentName);
+      let studentInfo = studentCache.get(normalizedStudentName);
 
-      if (!studentId) {
+      if (!studentInfo) {
         // Split name into first and last name
         const nameParts = studentName.split(/\s+/);
         const firstName = nameParts[0] ?? studentName;
@@ -467,18 +479,22 @@ export async function importLessonsFromGoogleCalendar(
           },
         });
 
-        studentId = newStudent.id;
-        studentCache.set(normalizedStudentName, studentId);
+        studentInfo = {
+          id: newStudent.id,
+          defaultLessonPrice: newStudent.defaultLessonPrice ?? null,
+        };
+        studentCache.set(normalizedStudentName, studentInfo);
         studentsCreated++;
       }
 
-      // Create the lesson
+      // Create the lesson with student's default price
       await prisma.lesson.create({
         data: {
           title: event.description || null, // Use event description as lesson title
           start: new Date(startDateTime),
           end: new Date(endDateTime),
-          studentId,
+          studentId: studentInfo.id,
+          price: studentInfo.defaultLessonPrice ?? null,
           googleEventId: event.id,
           recurrent: false,
         },

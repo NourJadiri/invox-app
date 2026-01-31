@@ -104,7 +104,7 @@ export function StudentDraftCard({
                         />
                     </div>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
+<div className="grid gap-4 sm:grid-cols-3">
                         <SimpleInput
                             label="Email"
                             name="email"
@@ -120,6 +120,17 @@ export function StudentDraftCard({
                             value={draft.phone}
                             onChange={onChange}
                             placeholder="+1 (555) 123-4567"
+                            disabled={loading}
+                        />
+                        <SimpleInput
+                            label="Default Lesson Price"
+                            name="defaultLessonPrice"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={draft.defaultLessonPrice ?? ""}
+                            onChange={onChange}
+                            placeholder="50.00"
                             disabled={loading}
                         />
                     </div>

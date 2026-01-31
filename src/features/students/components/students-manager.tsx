@@ -47,12 +47,13 @@ export default function StudentsManager({ initialStudents }: { initialStudents: 
         setDraftLoading(true);
         setDraftError(null);
 
-        const payload = {
+const payload = {
             firstName: draft.firstName.trim(),
             lastName: draft.lastName.trim(),
             email: draft.email.trim() || null,
             phone: draft.phone.trim() || null,
             notes: draft.notes.trim() || null,
+            defaultLessonPrice: draft.defaultLessonPrice,
         }
 
         try {
@@ -125,7 +126,7 @@ export default function StudentsManager({ initialStudents }: { initialStudents: 
         setStudentToDelete(null);
     }
 
-    function handleEdit(student: Student) {
+function handleEdit(student: Student) {
         setDraftMode("edit");
         setStudentBeingEdited(student);
         setDraft({
@@ -134,6 +135,7 @@ export default function StudentsManager({ initialStudents }: { initialStudents: 
             email: student.email || "",
             phone: student.phone || "",
             notes: student.notes || "",
+            defaultLessonPrice: student.defaultLessonPrice ?? null,
         });
         setDraftError(null);
         setShowDraft(true);

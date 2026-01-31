@@ -35,7 +35,7 @@ export async function getStudentById(id: string): Promise<Student | null> {
  * Creates a new student.
  */
 export async function createStudent(input: CreateStudentInput): Promise<Student> {
-  const { firstName, lastName, email, phone, notes } = input;
+  const { firstName, lastName, email, phone, notes, defaultLessonPrice } = input;
 
   const student = await prisma.student.create({
     data: {
@@ -44,6 +44,7 @@ export async function createStudent(input: CreateStudentInput): Promise<Student>
       email: email?.trim() || null,
       phone: phone?.trim() || null,
       notes: notes?.trim() || null,
+      defaultLessonPrice: defaultLessonPrice ?? null,
     },
   });
 
@@ -57,7 +58,7 @@ export async function updateStudent(
   id: string,
   input: UpdateStudentInput
 ): Promise<Student> {
-  const { firstName, lastName, email, phone, notes } = input;
+  const { firstName, lastName, email, phone, notes, defaultLessonPrice } = input;
 
   const student = await prisma.student.update({
     where: { id },
@@ -67,6 +68,7 @@ export async function updateStudent(
       email: email?.trim() || null,
       phone: phone?.trim() || null,
       notes: notes?.trim() || null,
+      defaultLessonPrice: defaultLessonPrice ?? null,
     },
   });
 

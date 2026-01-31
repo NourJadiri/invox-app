@@ -21,6 +21,7 @@ export interface CreateStudentInput {
   email?: string | null;
   phone?: string | null;
   notes?: string | null;
+  defaultLessonPrice?: number | null;
 }
 
 export interface UpdateStudentInput {
@@ -29,4 +30,5 @@ export interface UpdateStudentInput {
   email?: string | null;
   phone?: string | null;
   notes?: string | null;
+  defaultLessonPrice?: number | null;
 }

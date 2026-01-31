@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, DollarSign } from "lucide-react";
 import type { StudentFormValues } from "../types";
 
 type StudentFormProps = {
@@ -88,7 +88,7 @@ export function StudentForm({
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+<div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -109,6 +109,23 @@ export function StudentForm({
                 value={form.phone}
                 onChange={onChange}
                 placeholder="+1 (555) 123-4567"
+                className="transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="defaultLessonPrice" className="flex items-center gap-1.5">
+                <DollarSign className="h-3.5 w-3.5" />
+                Default Lesson Price
+              </Label>
+              <Input
+                id="defaultLessonPrice"
+                name="defaultLessonPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.defaultLessonPrice ?? ""}
+                onChange={onChange}
+                placeholder="50.00"
                 className="transition-all"
               />
             </div>
